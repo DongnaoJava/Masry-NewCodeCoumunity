@@ -30,3 +30,7 @@ mybatis:
 logging:
   level:
     com.bin.dao: debug
+
+community:
+  path:
+    domain: http://localhost:8080
