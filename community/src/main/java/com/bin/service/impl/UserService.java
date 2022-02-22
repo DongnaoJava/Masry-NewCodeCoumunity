@@ -164,6 +164,7 @@ public class UserService implements UserMapper {
         User user = userMapper.selectUserByName(username);
         if (user == null) {
             mapInfo.put("accountInfo", "账号不存在！");
+            return mapInfo;
         } else {
             if (user.getStatus() == 0) {
                 mapInfo.put("accountInfo", "该账号未激活！");

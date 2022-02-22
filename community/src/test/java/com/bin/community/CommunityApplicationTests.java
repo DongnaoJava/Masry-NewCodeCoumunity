@@ -45,7 +45,13 @@ class CommunityApplicationTests {
         System.out.println(ticketService.selectByTicket("abc"));
     }
     @Test
-    public void TestCode() {
-
+    public void TestCode() throws InterruptedException {
+        System.out.println(new Date().getTime());
+        Thread.sleep(3000);
+        System.out.println(new Date().getTime());
+    }
+    @Test
+    public void Test(){
+        System.out.println("Ab8D".toLowerCase());
     }
 }
