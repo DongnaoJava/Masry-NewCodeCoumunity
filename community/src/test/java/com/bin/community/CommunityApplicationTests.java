@@ -3,6 +3,7 @@ package com.bin.community;
 import com.bin.bean.LoginTicket;
 import com.bin.dao.TicketMapper;
 import com.bin.service.TicketService;
+import com.bin.util.loginUtil.VerificationCodeUtil;
 import com.bin.util.mailUtil.MailSendUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +43,9 @@ class CommunityApplicationTests {
         System.out.println(ticketService.selectByTicket("abc"));
         ticketService.updateStatusByTicket("abc",1);
         System.out.println(ticketService.selectByTicket("abc"));
+    }
+    @Test
+    public void TestCode() {
+
     }
 }

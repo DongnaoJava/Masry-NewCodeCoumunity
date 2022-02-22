@@ -9,8 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TicketServiceImpl implements TicketService {
     @Autowired
-    TicketMapper ticketMapper;
+    private TicketMapper ticketMapper;
 
+    //插入一条登录数据
     @Override
     public int insertTicket(LoginTicket loginTicket) {
         if (loginTicket != null)
@@ -18,6 +19,7 @@ public class TicketServiceImpl implements TicketService {
         return 0;
     }
 
+    //根据ticket查询一条登陆数据
     @Override
     public LoginTicket selectByTicket(String ticket) {
         if (ticket != null)
@@ -25,6 +27,7 @@ public class TicketServiceImpl implements TicketService {
         return null;
     }
 
+    //根据ticket更新用户状态，其中0为退出登录，1为在线
     @Override
     public int updateStatusByTicket(String ticket, Integer status) {
         return ticketMapper.updateStatusByTicket(ticket, status);

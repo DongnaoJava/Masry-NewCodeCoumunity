@@ -1,6 +1,7 @@
 package com.bin.service.impl;
 
 import com.bin.bean.ActivationConsequence;
+import com.bin.bean.LoginTicket;
 import com.bin.bean.User;
 import com.bin.dao.UserMapper;
 import com.bin.util.mailUtil.MailSendUtil;
@@ -21,11 +22,13 @@ public class UserService implements UserMapper {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    MailSendUtil mailSendUtil;
+    private MailSendUtil mailSendUtil;
     @Autowired
-    TemplateEngine templateEngine;
+    private TemplateEngine templateEngine;
     @Value("${community.path.domain}")
-    String domain;
+    private String domain;
+    @Autowired
+    private TicketServiceImpl ticketService;
 
     //根据id查询用户所有信息
     @Override
@@ -129,17 +132,62 @@ public class UserService implements UserMapper {
         return mapInfo;
     }
 
+    //激活用户
     public Enum<ActivationConsequence> activation(Integer id, String activationCode) {
         User user = userMapper.selectUserById(id);
         if (user != null && user.getActivationCode() != null && user.getActivationCode().equals(activationCode)) {
             if (user.getStatus() == 0) {
-                userMapper.updateStatus(id,1);
+                userMapper.updateStatus(id, 1);
                 return ActivationConsequence.ACTIVATION_SUCCESS;
             } else
                 return ActivationConsequence.ACTIVATION_REPEAT;
         } else {
             return ActivationConsequence.ACTIVATION_FAILURE;
         }
+    }
+
+    //验证用户登录信息
+    public Map<String, String> judgeUserLoginInfo(String username, String password, Integer expiredTime) {
+        Map<String, String> mapInfo = new HashMap<>();
+        if (StringUtils.isBlank(username)) {
+            mapInfo.put("accountInfo", "账号不能为空！");
+            return mapInfo;
+        }
+        if (StringUtils.isBlank(password)) {
+            mapInfo.put("passwordInfo", "密码不能为空！");
+            return mapInfo;
+        }
+        /* if (StringUtils.isBlank(verificationCode)) {
+            mapInfo.put("verificationCodeInfo", "验证码不能为空!");
+            return mapInfo;
+        }*/
+        User user = userMapper.selectUserByName(username);
+        if (user == null) {
+            mapInfo.put("accountInfo", "账号不存在！");
+        } else {
+            if (user.getStatus() == 0) {
+                mapInfo.put("accountInfo", "该账号未激活！");
+                return mapInfo;
+            }
+            //判读密码正不正确
+            String userInputPassword = Md5Util.Md5(password + user.getSalt());
+            String userPassword = user.getPassword();
+            if (!userInputPassword.equals(userPassword)) {
+                mapInfo.put("passwordInfo", "密码不正确！");
+                return mapInfo;
+            }
+        }
+
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(Md5Util.generateUUID());
+        //账号有效状态为0，无效为1，与账号是否激活的status不是一个概念
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis()+expiredTime * 1000));
+        ticketService.insertTicket(loginTicket);
+
+        mapInfo.put("ticket",loginTicket.getTicket());
+        return mapInfo;
     }
 }
 

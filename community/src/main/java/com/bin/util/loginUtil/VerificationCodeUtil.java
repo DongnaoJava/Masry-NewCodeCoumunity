@@ -1,15 +1,13 @@
 package com.bin.util.loginUtil;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 public class VerificationCodeUtil {
+
     //获取随机的大小写字母和数字组成的验证码
-    private static String getRandomCode(int length) {
+    public static String getRandomCode(int length) {
         int i = 0;
         StringBuilder randomCode = new StringBuilder(16);
         while (i < length) {
@@ -25,17 +23,16 @@ public class VerificationCodeUtil {
 
     //绘制图片
     private static BufferedImage drawCodeImage(String code, int interLineNums, int width, int height, Color backColor) {
-        BufferedImage image = new BufferedImage(100, 40, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics g = image.getGraphics();
 
         //绘制背景
         g.setColor(backColor);
         g.fillRect(0, 0, width, height);
 
+        //绘制干扰线 interLineNums为干扰线数量
         //随机操作对象
         Random r = new Random();
-
-        //绘制干扰线 interLineNums为干扰线数量
         if (interLineNums > 0) {
             int x = r.nextInt(4), y = 0;
             int x1 = width - r.nextInt(4), y1 = 0;
@@ -46,10 +43,12 @@ public class VerificationCodeUtil {
                 g.drawLine(x, y, x1, y1);
             }
         }
+
         //写验证码
         int fontSize = (int) (height * 0.8);//字体大小为图片高度的80%
-        int fx = 0;
+        int fx = 2;
         g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, fontSize));
+
         //写字符
         for (int i = 0; i < code.length(); i++) {
             g.setColor(Color.BLACK);
@@ -76,7 +75,7 @@ public class VerificationCodeUtil {
     //x方向扭曲
     private static void shearX(Graphics g, int w1, int h1, Color color) {
         Random random = new Random();
-        int period = 2;
+        int period = 4;
         int frames = 1;
         int phase = random.nextInt(2);
 
@@ -93,7 +92,7 @@ public class VerificationCodeUtil {
     //y方向扭曲
     private static void shearY(Graphics g, int w1, int h1, Color color) {
         Random random = new Random();
-        int period = random.nextInt(15) + 10; // 25;
+        int period = random.nextInt(10) + 10; // 25;
         int frames = 20;
         int phase = random.nextInt(2);
         for (int i = 0; i < w1; i++) {
@@ -107,6 +106,7 @@ public class VerificationCodeUtil {
         }
     }
 
+    //获取随机的RGB颜色
     private static Color getRandColorCode() {
         int r, g, b;
         Random random = new Random();
@@ -116,18 +116,25 @@ public class VerificationCodeUtil {
         return new Color(r, g, b);
     }
 
+/*    //保存生成验证码图片
     public static void saveVerificationCodeImg() {
         String randomCode = VerificationCodeUtil.getRandomCode(4);
         System.out.println(randomCode);
         BufferedImage imageFromCode = VerificationCodeUtil.drawCodeImage(randomCode, 3, 100, 40, Color.WHITE);
         try {
+            //获取项目的绝对路径
             String projectPath = new File(".").getCanonicalPath();
-            File file = new File(projectPath + "/src/main/resources/static/img/captcha.png");
+            //拼接验证码的绝对路径
+            File file = new File(projectPath + "/src/main/resources/static/img/cptcha.png");
             ImageIO.write(imageFromCode, "png", file);
             System.out.println("成功保存到：" + file.getAbsolutePath());
         } catch (IOException e) {
             System.out.println("保存失败");
             e.printStackTrace();
         }
+    }*/
+
+    public static BufferedImage getCodeImg(String randomCode) {
+        return VerificationCodeUtil.drawCodeImage(randomCode, 3, 100, 40, Color.WHITE);
     }
 }
