@@ -2,23 +2,27 @@ package com.bin.service.impl;
 
 import com.bin.bean.ActivationConsequence;
 import com.bin.bean.LoginTicket;
+import com.bin.bean.TicketExpiredTime;
 import com.bin.bean.User;
 import com.bin.dao.UserMapper;
-import com.bin.util.mailUtil.MailSendUtil;
-import com.bin.util.registerUtil.Md5Util;
+import com.bin.util.MailSendUtil;
+import com.bin.util.Md5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class UserService implements UserMapper {
+public class UserService implements UserMapper, TicketExpiredTime {
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -189,6 +193,42 @@ public class UserService implements UserMapper {
 
         mapInfo.put("ticket",loginTicket.getTicket());
         return mapInfo;
+    }
+
+    //用户第一次登录
+    public String firstLogin(String username, String password, Model model, HttpSession session,
+                             String verificationCode, HttpServletResponse response, boolean remember) {
+        String target;
+        int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
+        Map<String, String> mapInfo = judgeUserLoginInfo(username, password, expiredTime);
+        if (mapInfo.get("ticket") != null) {
+            String correctCode = (String) session.getAttribute("verificationCode");
+            if (verificationCode == null) {
+                model.addAttribute("codeInfo", "验证码不能为空！");
+                target = "login";
+            } else {
+                if (!verificationCode.equalsIgnoreCase(correctCode)) {
+                    model.addAttribute("codeInfo", "验证码错误！");
+                    target = "login";
+                } else {
+                    Cookie cookie = new Cookie("ticket", mapInfo.get("ticket"));
+                    cookie.setPath("/");
+                    cookie.setMaxAge(expiredTime);
+                    response.addCookie(cookie);
+                    target = "index";
+                }
+            }
+        } else {
+            model.addAttribute("accountInfo", mapInfo.get("accountInfo"));
+            model.addAttribute("passwordInfo", mapInfo.get("passwordInfo"));
+            target = "login";
+        }
+        return target;
+    }
+
+    //用户退出登录
+    public void logout(String ticket){
+      ticketService.updateStatusByTicket(ticket,1);
     }
 }
 

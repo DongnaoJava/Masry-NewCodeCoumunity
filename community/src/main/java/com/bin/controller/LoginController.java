@@ -2,9 +2,12 @@ package com.bin.controller;
 
 import com.bin.bean.ActivationConsequence;
 import com.bin.bean.LoginTicket;
+import com.bin.bean.TicketExpiredTime;
 import com.bin.bean.User;
 import com.bin.service.TicketService;
+import com.bin.service.impl.TicketServiceImpl;
 import com.bin.service.impl.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,20 +15,17 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 
 @Controller
-public class LoginController {
+public class LoginController implements TicketExpiredTime {
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    TicketService ticketService;
+    private TicketServiceImpl ticketService;
 
     @GetMapping("/register")
     public String getRegisterHtml() {
@@ -73,44 +73,25 @@ public class LoginController {
     @PostMapping("/login")
     public String login(@CookieValue(value = "ticket", required = false) String ticket,
                         HttpServletResponse response, String username, String password,
-                        String verificationCode, Model model, HttpSession session) {
+                        String verificationCode, Model model, HttpSession session, boolean remember) {
         String target = null;
-        if (ticket == null) {
+        if (StringUtils.isBlank(ticket)) {
             //说明第一次登陆
-            Map<String, String> mapInfo = userService.judgeUserLoginInfo(username, password, 120);
-            if (mapInfo.get("ticket") != null) {
-                String correctCode = (String) session.getAttribute("verificationCode");
-                if (verificationCode == null) {
-                    model.addAttribute("codeInfo", "验证码不能为空！");
-                    target = "login";
-                } else {
-                    verificationCode = verificationCode.toLowerCase();
-                    correctCode = correctCode.toLowerCase();
-                    if (!verificationCode.equals(correctCode)) {
-                        model.addAttribute("codeInfo", "验证码错误！");
-                        target = "login";
-                    } else {
-                        Cookie cookie = new Cookie("ticket", mapInfo.get("ticket"));
-                        cookie.setMaxAge(60 * 3);
-                        response.addCookie(cookie);
-                        target = "index";
-                    }
-                }
-            } else {
-                model.addAttribute("accountInfo", mapInfo.get("accountInfo"));
-                model.addAttribute("passwordInfo", mapInfo.get("passwordInfo"));
-                target = "login";
-            }
+            int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
+            Map<String, String> mapInfo = userService.judgeUserLoginInfo(username, password, expiredTime);
+            if (mapInfo.get("ticket") != null)
+                target = userService.firstLogin(username, password, model, session, verificationCode, response, remember);
         } else {
             //说明第二次登陆
             LoginTicket loginTicket = ticketService.selectByTicket(ticket);
             if (loginTicket != null) {
-                long expired = loginTicket.getExpired().getTime();
-                long thisTime = new Date().getTime();
-                if (expired >= thisTime) {
+                if (loginTicket.getExpired().after(new Date())) {
                     target = "index";
-                } else target = "login";
-            }
+                } else
+                    target = userService.firstLogin(username, password, model, session, verificationCode, response, remember);
+            } else
+                target = userService.firstLogin(username, password, model, session, verificationCode, response, remember);
+
         }
         //到login（携带参数）get方式 return
         if ("login".equals(target)) {
@@ -121,5 +102,25 @@ public class LoginController {
         //重定向到index get方式
         else
             return "redirect:index";
+    }
+
+    @GetMapping("/logout")
+    public String logout(@CookieValue(value = "ticket", required = false) String ticket, Model model) {
+        if (ticket == null) {
+            model.addAttribute("logInfo", "您还没有登录！");
+        } else {
+            LoginTicket l = ticketService.selectByTicket(ticket);
+            if (l == null)
+                model.addAttribute("logInfo", "您还没有登录！");
+            else {
+                if (l.getStatus() == 1)
+                    model.addAttribute("logInfo", "您还没有登录！");
+                else {
+                    userService.logout(ticket);
+                    model.addAttribute("logInfo", "您已退出登录！");
+                }
+            }
+        }
+        return "redirect:index";
     }
 }
