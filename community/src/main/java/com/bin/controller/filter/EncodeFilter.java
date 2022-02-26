@@ -1,4 +1,4 @@
-package com.bin.filter;
+package com.bin.controller.filter;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.bin.util.loginUtil;
+package com.bin.util;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

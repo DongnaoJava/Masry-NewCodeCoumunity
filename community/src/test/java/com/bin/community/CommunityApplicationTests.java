@@ -1,17 +1,16 @@
 package com.bin.community;
 
-import com.bin.bean.LoginTicket;
-import com.bin.dao.TicketMapper;
 import com.bin.service.TicketService;
-import com.bin.util.loginUtil.VerificationCodeUtil;
-import com.bin.util.mailUtil.MailSendUtil;
+import com.bin.util.MailSendUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.Date;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 
 @SpringBootTest
@@ -41,17 +40,25 @@ class CommunityApplicationTests {
         /*LoginTicket loginTicket = new LoginTicket(null,1001,"abc",0,new Date());
         ticketService.insertTicket(loginTicket);*/
         System.out.println(ticketService.selectByTicket("abc"));
-        ticketService.updateStatusByTicket("abc",1);
+        ticketService.updateStatusByTicket("abc", 1);
         System.out.println(ticketService.selectByTicket("abc"));
     }
+
     @Test
     public void TestCode() throws InterruptedException {
         System.out.println(new Date().getTime());
         Thread.sleep(3000);
         System.out.println(new Date().getTime());
     }
+
     @Test
-    public void Test(){
-        System.out.println("Ab8D".toLowerCase());
+    public void Test() {
+        try {
+           Annotation A = Class.forName("com.bin.controller.HomeController").getAnnotation(Component.class);
+            System.out.println(A==null);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
+
 }

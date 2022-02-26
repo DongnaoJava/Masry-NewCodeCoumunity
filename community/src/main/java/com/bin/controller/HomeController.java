@@ -6,11 +6,13 @@ import com.bin.bean.User;
 import com.bin.service.DiscussPostService;
 import com.bin.service.impl.DiscussPostServiceImpl;
 import com.bin.service.impl.UserService;
+import com.sun.mail.imap.protocol.MODSEQ;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +23,9 @@ import java.util.Map;
 @Controller
 public class HomeController {
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    DiscussPostServiceImpl discussPostService;
+    private DiscussPostServiceImpl discussPostService;
 
     @GetMapping({"/index", "/"})
     public String Index(Model model, Page page) {

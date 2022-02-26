@@ -1,4 +1,4 @@
-package com.bin.util.registerUtil;
+package com.bin.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.DigestUtils;

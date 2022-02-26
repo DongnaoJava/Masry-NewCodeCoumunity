@@ -27,7 +27,7 @@ public class TicketServiceImpl implements TicketService {
         return null;
     }
 
-    //根据ticket更新用户状态，其中0为退出登录，1为在线
+    //根据ticket更新用户状态，其中1为退出登录，0为在线
     @Override
     public int updateStatusByTicket(String ticket, Integer status) {
         return ticketMapper.updateStatusByTicket(ticket, status);
