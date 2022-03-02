@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.util.HashMap;
@@ -81,7 +82,7 @@ public class SensitiveFilter {
         // 结果
         StringBuilder sb = new StringBuilder();
 
-        while (position < text.length()) {
+        while (begin < text.length()) {
             char c = text.charAt(position);
 
             // 跳过符号
@@ -114,13 +115,10 @@ public class SensitiveFilter {
                 tempNode = rootNode;
             } else {
                 // 检查下一个字符
-                position++;
+                if (position < text.length() - 1)
+                    position++;
             }
         }
-
-        // 将最后一批字符计入结果
-        sb.append(text.substring(begin));
-
         return sb.toString();
     }
 

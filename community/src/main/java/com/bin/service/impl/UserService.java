@@ -6,7 +6,7 @@ import com.bin.bean.TicketExpiredTime;
 import com.bin.bean.User;
 import com.bin.dao.UserMapper;
 import com.bin.util.MailSendUtil;
-import com.bin.util.Md5Util;
+import com.bin.util.CommunityUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,11 +116,11 @@ public class UserService implements UserMapper, TicketExpiredTime {
                 // 已经在前端页面中实现控制
             }
             //注册用户
-            user.setSalt(Md5Util.generateUUID().substring(0, 5));
-            user.setPassword(Md5Util.Md5(user.getPassword() + user.getSalt()));
+            user.setSalt(CommunityUtil.generateUUID().substring(0, 5));
+            user.setPassword(CommunityUtil.Md5(user.getPassword() + user.getSalt()));
             user.setType(0);
             user.setStatus(0);
-            user.setActivationCode(Md5Util.generateUUID());
+            user.setActivationCode(CommunityUtil.generateUUID());
             user.setHeaderUrl("http://api.btstu.cn/sjtx/api.php?lx=c1&format=images");
             user.setCreateTime(new Date());
             userMapper.insertUser(user);
@@ -175,7 +175,7 @@ public class UserService implements UserMapper, TicketExpiredTime {
                 return mapInfo;
             }
             //判读密码正不正确
-            String userInputPassword = Md5Util.Md5(password + user.getSalt());
+            String userInputPassword = CommunityUtil.Md5(password + user.getSalt());
             String userPassword = user.getPassword();
             if (!userInputPassword.equals(userPassword)) {
                 mapInfo.put("passwordInfo", "密码不正确！");
@@ -185,7 +185,7 @@ public class UserService implements UserMapper, TicketExpiredTime {
 
         LoginTicket loginTicket = new LoginTicket();
         loginTicket.setUserId(user.getId());
-        loginTicket.setTicket(Md5Util.generateUUID());
+        loginTicket.setTicket(CommunityUtil.generateUUID());
         //账号有效状态为0，无效为1，与账号是否激活的status不是一个概念
         loginTicket.setStatus(0);
         loginTicket.setExpired(new Date(System.currentTimeMillis()+expiredTime * 1000));

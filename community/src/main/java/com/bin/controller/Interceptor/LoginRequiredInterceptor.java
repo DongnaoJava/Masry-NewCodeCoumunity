@@ -1,6 +1,6 @@
 package com.bin.controller.Interceptor;
 
-import com.bin.Annotation.LoginRequired;
+import com.bin.annotation.LoginRequired;
 import com.bin.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

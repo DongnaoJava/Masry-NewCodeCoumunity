@@ -1,4 +1,4 @@
-package com.bin.Annotation;
+package com.bin.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,6 +1,6 @@
 package com.bin.controller;
 
-import com.bin.Annotation.LoginRequired;
+import com.bin.annotation.LoginRequired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 

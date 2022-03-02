@@ -8,15 +8,20 @@ import java.util.Date;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class DiscussPost {
-   private Integer id;
-   private Integer userId;
-   private String title;
-   private String content;
-   private Integer type;
-   private Integer status;
-   private Date createTime;
-   private Integer commentCount;
-   private Double score;
+    private Integer id;
+    private Integer userId;
+    private String title;
+    private String content;
+    private Integer type;
+    private Integer status;
+    private Date createTime;
+    private Integer commentCount;
+    private Double score;
+
+    public DiscussPost() {
+        type = 0;
+        status = 0;
+        score = 0.0;
+    }
 }

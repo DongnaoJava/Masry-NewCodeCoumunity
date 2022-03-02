@@ -1,7 +1,9 @@
 package com.bin.controller;
 
+import com.bin.util.CommunityUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.Cookie;
@@ -28,5 +30,12 @@ public class AlphaController {
         response.addCookie(cookie2);
         response.addCookie(cookie3);
         return "ok";
+    }
+    @PostMapping("/ajax")
+    @ResponseBody
+    public String getAjax(String name,int age){
+        System.out.println(name);
+        System.out.println(age);
+        return CommunityUtil.getJSONString("000","造作成功!");
     }
 }

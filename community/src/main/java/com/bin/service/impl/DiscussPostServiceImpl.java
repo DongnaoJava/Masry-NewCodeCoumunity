@@ -3,8 +3,12 @@ package com.bin.service.impl;
 import com.bin.bean.DiscussPost;
 import com.bin.dao.DiscussPostMapper;
 import com.bin.service.DiscussPostService;
+import com.bin.util.CommunityUtil;
+import com.bin.util.HostHolder;
+import com.bin.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 /*
@@ -18,7 +22,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Autowired
     private DiscussPostMapper discussPostMapper;
     @Autowired
-    private UserService userService;
+    private SensitiveFilter sensitiveFilter;
     //查询所有的帖子，分页查询
     @Override
     public List<DiscussPost> selectAllDiscussPosts(Integer offset, Integer limit) {
@@ -38,5 +42,21 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Override
     public int selectDiscussPostRowsByUserId(Integer userId) {
         return discussPostMapper.selectDiscussPostRows(userId);
+    }
+
+    @Override
+    public DiscussPost selectDiscussPostById(Integer id) {
+        return discussPostMapper.selectDiscussPostById(id);
+    }
+
+    //插入一条帖子
+    @Override
+    public int insertDiscussPost(DiscussPost discussPost) {
+        String title =discussPost.getTitle();
+        String content = discussPost.getContent();
+        //将用户输入的标题和内容进行敏感词过滤并转义
+        discussPost.setTitle(sensitiveFilter.filter(HtmlUtils.htmlEscape(title)));
+        discussPost.setContent(sensitiveFilter.filter(HtmlUtils.htmlEscape(content)));
+        return discussPostMapper.insertDiscussPost(discussPost);
     }
 }

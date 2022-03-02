@@ -6,8 +6,15 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface DiscussPostService {
-    List<DiscussPost> selectAllDiscussPosts(Integer offset,Integer limit);
-    List<DiscussPost> selectDiscussPostsByUserId(Integer userId,Integer offset,Integer limit);
+    List<DiscussPost> selectAllDiscussPosts(Integer offset, Integer limit);
+
     int selectAllDiscussPostRows();
+
+    List<DiscussPost> selectDiscussPostsByUserId(Integer userId, Integer offset, Integer limit);
+
     int selectDiscussPostRowsByUserId(Integer userId);
+
+    DiscussPost selectDiscussPostById(Integer id);
+
+    int insertDiscussPost(DiscussPost discussPost);
 }

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class User {
    private Integer id;
@@ -20,4 +19,8 @@ public class User {
    private String activationCode;
    private String headerUrl;
    private Date createTime;
+
+   public User() {
+      //可以默认赋值
+   }
 }

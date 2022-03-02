@@ -1,6 +1,8 @@
 package com.bin.community;
 
+import com.bin.bean.User;
 import com.bin.service.TicketService;
+import com.bin.util.CommunityUtil;
 import com.bin.util.MailSendUtil;
 import com.bin.util.SensitiveFilter;
 import org.junit.jupiter.api.Test;
@@ -56,7 +58,16 @@ class CommunityApplicationTests {
 
     @Test
     public void Test() {
-        System.out.println(sensitiveFilter.filter("你是煞笔，傻逼，傻吊，二比，二逼，操你妈，操他妈，草泥马"));
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "贾斌");
+        map.put("age", "20");
+        map.put("sex", "man");
+        User user = new User();
+        user.setEmail("saddasd");
+        user.setUsername("lihua");
+        user.setPassword("w1eqweqw");
+        map.put("user",user);
+        System.out.println(CommunityUtil.getJSONString("122345", "woaini"));
     }
 
 }
