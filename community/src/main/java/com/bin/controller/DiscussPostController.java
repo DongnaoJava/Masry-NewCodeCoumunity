@@ -1,8 +1,8 @@
 package com.bin.controller;
 
 
-import com.bin.bean.DiscussPost;
-import com.bin.bean.User;
+import com.bin.bean.*;
+import com.bin.service.impl.CommentServiceImpl;
 import com.bin.service.impl.DiscussPostServiceImpl;
 import com.bin.service.impl.UserService;
 import com.bin.util.CommunityUtil;
@@ -12,17 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.util.Date;
+
+import java.util.*;
 
 @Controller
 @RequestMapping("discuss")
-public class DiscussPostController {
+public class DiscussPostController implements CommunityConstant {
     @Autowired
     private HostHolder hostHolder;
     @Autowired
     private DiscussPostServiceImpl discussPostService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CommentServiceImpl commentService;
 
     @ResponseBody
     @PostMapping("/add")
@@ -42,11 +45,63 @@ public class DiscussPostController {
     }
 
     @GetMapping("/detail/{id}")
-    public String getDiscussPostDetail(@PathVariable("id") Integer id, Model model) {
+    public String getDiscussPostDetail(@PathVariable("id") Integer id, Model model, Page page) {
+        //帖子细节
         DiscussPost postDetail = discussPostService.selectDiscussPostById(id);
+        model.addAttribute("postDetail", postDetail);
+
+        //作者
         User user = userService.selectUserById(postDetail.getUserId());
-        model.addAttribute("postDetail",postDetail);
-        model.addAttribute("user",user);
-        return "site/discuss-detail";
+        model.addAttribute("user", user);
+
+        //评论分页信息
+        page.setLimit(5);
+        //在帖子表中存了评论数量，就不需要查询帖子数量了
+        page.setRows(postDetail.getCommentCount());
+        page.setPath("/discuss/detail/" + id);
+
+        //评论：给帖子的评论
+        //回复：给评论的评论
+        List<Comment> commentList = commentService.selectAllCommentsByEntity(ENTITY_TYPE_POST, postDetail.getId(), page.getOffset(), page.getLimit());
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (Comment comment : commentList) {
+            //commentMap为每一个帖子显示对象
+            Map<String, Object> commentMap = new HashMap<>();
+            //把评论放入commentMap
+            commentMap.put("comment", comment);
+            //评论的作者放入commentMap
+            User commentUser = userService.selectUserById(comment.getUserId());
+            commentMap.put("commentUser", commentUser);
+
+            //把评论的回复放入commentMap
+            List<Comment> commentReplyList = commentService.selectAllCommentsByEntity(ENTITY_TYPE_COMMENT, comment.getId(), 0, Integer.MAX_VALUE);
+            List<Map<String, Object>> mapList2 = new ArrayList<>();
+            if (commentReplyList != null) {
+                for (Comment commentReply : commentReplyList) {
+                    //每一个回复的显示对象
+                    Map<String, Object> replyMap = new HashMap<>();
+                    //把回复放入replyMap
+                    replyMap.put("reply", commentReply);
+                    //把回复的作者放入replyMap
+                    User replyUser = userService.selectUserById(commentReply.getUserId());
+                    replyMap.put("replyUser", replyUser);
+                    //把回复的目标放入replyMap
+                    User targetUser = commentReply.getTargetId() == 0 ? null : userService.selectUserById(commentReply.getTargetId());
+                    replyMap.put("targetUser", targetUser);
+                    mapList2.add(replyMap);
+                }
+            }
+            //把帖子的各种回复放入commentMap
+            commentMap.put("replyList", mapList2);
+
+            //把帖子的评论数量放入
+            int commentCount = commentService.selectCountByEntity(ENTITY_TYPE_COMMENT, comment.getId());
+            commentMap.put("commentCount", commentCount);
+
+            //把每个帖子放入到帖子列表
+            mapList.add(commentMap);
+        }
+        model.addAttribute("commentMap", mapList);
+        return "/site/discuss-detail";
     }
 }

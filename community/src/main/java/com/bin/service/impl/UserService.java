@@ -2,7 +2,7 @@ package com.bin.service.impl;
 
 import com.bin.bean.ActivationConsequence;
 import com.bin.bean.LoginTicket;
-import com.bin.bean.TicketExpiredTime;
+import com.bin.bean.CommunityConstant;
 import com.bin.bean.User;
 import com.bin.dao.UserMapper;
 import com.bin.util.MailSendUtil;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class UserService implements UserMapper, TicketExpiredTime {
+public class UserService implements UserMapper, CommunityConstant {
     @Autowired
     private UserMapper userMapper;
     @Autowired

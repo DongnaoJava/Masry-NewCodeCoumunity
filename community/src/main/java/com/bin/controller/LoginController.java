@@ -2,9 +2,8 @@ package com.bin.controller;
 
 import com.bin.bean.ActivationConsequence;
 import com.bin.bean.LoginTicket;
-import com.bin.bean.TicketExpiredTime;
+import com.bin.bean.CommunityConstant;
 import com.bin.bean.User;
-import com.bin.service.TicketService;
 import com.bin.service.impl.TicketServiceImpl;
 import com.bin.service.impl.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +20,7 @@ import java.util.Date;
 import java.util.Map;
 
 @Controller
-public class LoginController implements TicketExpiredTime {
+public class LoginController implements CommunityConstant {
     @Autowired
     private UserService userService;
     @Autowired
