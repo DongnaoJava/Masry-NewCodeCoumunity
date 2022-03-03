@@ -26,4 +26,5 @@
         insert into user(<include refid="insertFields"></include>)
         values(#{username},#{password},#{salt},#{email},#{type},#{status},#{activationCode},#{headerUrl},#{createTime})
     </insert>
+
 </mapper>

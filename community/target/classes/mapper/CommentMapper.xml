@@ -5,6 +5,9 @@
     <sql id="selectFields">
         id,user_id,entity_type,entity_id,target_id,content,status,create_time
     </sql>
+    <sql id="insertFields">
+        user_id,entity_type,entity_id,target_id,content,status,create_time
+    </sql>
     <select id="selectAllCommentsByEntity" resultType="com.bin.bean.Comment">
         select <include refid="selectFields"></include>
         from comment
@@ -21,4 +24,10 @@
         and entity_type=#{entityType}
         and entity_id=#{entityId}
     </select>
+
+    <insert id="insertComment" keyProperty="id" parameterType="com.bin.bean.Comment">
+        insert into comment(<include refid="insertFields"></include>)
+        values(#{user_id},#{entity_type},#{entity_id},#{target_id},#{content},#{status},#{create_time})
+    </insert>
+
 </mapper>
