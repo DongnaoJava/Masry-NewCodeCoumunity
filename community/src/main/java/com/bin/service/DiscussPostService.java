@@ -17,4 +17,7 @@ public interface DiscussPostService {
     DiscussPost selectDiscussPostById(Integer id);
 
     int insertDiscussPost(DiscussPost discussPost);
+
+    //更新帖子的评论数量
+    int updateDiscussPostCommentCountById(Integer id,Integer commentCount);
 }

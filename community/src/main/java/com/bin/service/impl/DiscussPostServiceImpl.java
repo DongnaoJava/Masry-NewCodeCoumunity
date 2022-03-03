@@ -59,4 +59,14 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         discussPost.setContent(sensitiveFilter.filter(HtmlUtils.htmlEscape(content)));
         return discussPostMapper.insertDiscussPost(discussPost);
     }
+
+    @Override
+    public int updateDiscussPostCommentCountById(Integer id, Integer commentCount) {
+        DiscussPost discussPost = discussPostMapper.selectDiscussPostById(id);
+        if (discussPost==null)
+            throw new IllegalArgumentException("您要更新的帖子不存在！");
+        if (commentCount<0)
+            throw new IllegalArgumentException("帖子评论数量参数不合法！");
+        return discussPostMapper.updateDiscussPostCommentCountById(id,commentCount);
+    }
 }

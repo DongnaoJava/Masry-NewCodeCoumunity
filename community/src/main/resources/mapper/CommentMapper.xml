@@ -27,7 +27,7 @@
 
     <insert id="insertComment" keyProperty="id" parameterType="com.bin.bean.Comment">
         insert into comment(<include refid="insertFields"></include>)
-        values(#{user_id},#{entity_type},#{entity_id},#{target_id},#{content},#{status},#{create_time})
+        values(#{userId},#{entityType},#{entityId},#{targetId},#{content},#{status},#{createTime})
     </insert>
 
 </mapper>
