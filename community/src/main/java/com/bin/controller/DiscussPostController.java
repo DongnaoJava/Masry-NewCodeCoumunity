@@ -104,4 +104,6 @@ public class DiscussPostController implements CommunityConstant {
         model.addAttribute("commentMap", mapList);
         return "/site/discuss-detail";
     }
+
+
 }

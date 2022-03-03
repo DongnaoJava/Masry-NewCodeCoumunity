@@ -22,4 +22,10 @@ public class CommentServiceImpl implements CommentService {
     public int selectCountByEntity(Integer entityType, Integer entityId) {
         return commentMapper.selectCountByEntity(entityType,entityId);
     }
+
+    @Override
+    public int insertComment(Comment comment) {
+        return commentMapper.insertComment(comment);
+    }
+
 }
