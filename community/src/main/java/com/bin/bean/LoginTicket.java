@@ -10,9 +10,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginTicket {
-    Integer id;
-    Integer userId;
-    String ticket;
-    Integer status;
-    Date expired;
+   private Integer id;
+   private Integer userId;
+   private String ticket;
+   private Integer status;
+   private Date expired;
 }

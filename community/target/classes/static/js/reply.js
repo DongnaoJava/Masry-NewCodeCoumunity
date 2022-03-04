@@ -1,0 +1,3 @@
+$(function () {
+    $("#publishBtn").click(publish);
+});

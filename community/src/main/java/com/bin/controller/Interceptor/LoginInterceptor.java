@@ -2,6 +2,7 @@ package com.bin.controller.Interceptor;
 
 import com.bin.bean.LoginTicket;
 import com.bin.bean.User;
+import com.bin.service.impl.MessageServiceImpl;
 import com.bin.service.impl.TicketServiceImpl;
 import com.bin.service.impl.UserService;
 import com.bin.util.CookieUtil;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +26,8 @@ public class LoginInterceptor implements HandlerInterceptor {
     private HostHolder hostHolder;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MessageServiceImpl messageService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -44,8 +48,11 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         User user = hostHolder.getUser();
-        if (modelAndView != null && user != null)
+        if (modelAndView != null && user != null) {
             modelAndView.addObject("loginUser", user);
+            //所有的未读消息的数量
+            modelAndView.addObject("unreadAllMessageCount", messageService.selectAllMessagesUnreadRows(user.getId()));
+        }
     }
 
     @Override

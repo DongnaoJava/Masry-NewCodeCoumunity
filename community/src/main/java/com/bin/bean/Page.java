@@ -8,7 +8,7 @@ public class Page {
     //数据总数（用于计算页数）
     private int rows;
     //查询路径（复用分页链接）
-    private String path="/index";
+    private String path;
 
     public Page() {
     }
@@ -27,7 +27,7 @@ public class Page {
     }
 
     public void setLimit(int limit) {
-        if (1 <= limit && limit <= 50)
+        if (limit>=1 && limit <= 50)
             this.limit = limit;
     }
 
@@ -61,16 +61,14 @@ public class Page {
 
     //获取起始页
     public int getFrom() {
-        if (current >= 2)
-            return current - 2;
-        else return 1;
+        int from = current - 2;
+        return Math.max(from, 1);
     }
 
     //获取结束页
     public int getTo() {
-        if (current > getTotal() - 2)
-            return getTotal();
-        else
-            return current + 2;
+        int to = current + 2;
+        int total = getTotal();
+        return Math.min(to, total);
     }
 }
