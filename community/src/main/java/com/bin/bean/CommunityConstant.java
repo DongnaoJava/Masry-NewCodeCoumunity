@@ -17,4 +17,18 @@ public interface CommunityConstant {
      * 实体类型：评论
      */
     int ENTITY_TYPE_COMMENT = 2;
+
+    /**
+     * 私信消息状态：未读
+     */
+    int MESSAGE_STATE_UNREAD=0;
+    /**
+     * 私信消息状态：已读
+     */
+    int MESSAGE_STATE_READ = 1;
+    /**
+     * 私信消息状态：删除
+     */
+    int MESSAGE_STATE_DELETED = 2;
+
 }

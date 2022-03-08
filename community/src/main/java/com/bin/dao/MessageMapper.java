@@ -28,4 +28,7 @@ public interface MessageMapper {
 
     //更新一消息的状态（未读，已读，删除）
     Integer updateOneMessageStatus(Integer id,Integer status);
+
+    //插入一条新消息
+    Integer insertNewMessage(Message message);
 }

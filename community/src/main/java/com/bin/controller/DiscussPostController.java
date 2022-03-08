@@ -4,9 +4,11 @@ package com.bin.controller;
 import com.bin.bean.*;
 import com.bin.service.impl.CommentServiceImpl;
 import com.bin.service.impl.DiscussPostServiceImpl;
+import com.bin.service.impl.LikeServiceImpl;
 import com.bin.service.impl.UserService;
 import com.bin.util.CommunityUtil;
 import com.bin.util.HostHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,6 +28,8 @@ public class DiscussPostController implements CommunityConstant {
     private UserService userService;
     @Autowired
     private CommentServiceImpl commentService;
+    @Autowired
+    private LikeServiceImpl likeService;
 
     @ResponseBody
     @PostMapping("/add")
@@ -41,11 +45,12 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setCreateTime(new Date());
         discussPostService.insertDiscussPost(discussPost);
         //有可能会报错，之后要统一处理
-        return CommunityUtil.getJSONString("0", "发送成功！");
+        return CommunityUtil.getJSONString("0", "发贴成功！");
     }
 
     @GetMapping("/detail/{id}")
     public String getDiscussPostDetail(@PathVariable("id") Integer id, Model model, Page page) {
+
         //帖子细节
         DiscussPost postDetail = discussPostService.selectDiscussPostById(id);
         model.addAttribute("postDetail", postDetail);
@@ -53,6 +58,14 @@ public class DiscussPostController implements CommunityConstant {
         //作者
         User user = userService.selectUserById(postDetail.getUserId());
         model.addAttribute("user", user);
+
+        //点赞
+        long postLikeCount = likeService.findLikeCount(ENTITY_TYPE_POST, id);
+        model.addAttribute("postLikeCount", postLikeCount);
+        if (hostHolder.getUser() == null)
+            model.addAttribute("postIsLike", 0);
+        else
+            model.addAttribute("postIsLike", likeService.isLike(hostHolder.getUser().getId(), ENTITY_TYPE_POST, id));
 
         //评论分页信息
         page.setLimit(5);
@@ -72,6 +85,13 @@ public class DiscussPostController implements CommunityConstant {
             //评论的作者放入commentMap
             User commentUser = userService.selectUserById(comment.getUserId());
             commentMap.put("commentUser", commentUser);
+            //评论的点赞数量
+            long commentLikeCount = likeService.findLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
+            commentMap.put("commentLikeCount", commentLikeCount);
+            if (hostHolder.getUser() == null)
+                commentMap.put("commentIsLike", 0);
+            else
+                commentMap.put("commentIsLike", likeService.isLike(hostHolder.getUser().getId(), ENTITY_TYPE_COMMENT, comment.getId()));
 
             //把评论的回复放入commentMap
             List<Comment> commentReplyList = commentService.selectAllCommentsByEntity(ENTITY_TYPE_COMMENT, comment.getId(), 0, Integer.MAX_VALUE);
@@ -88,6 +108,14 @@ public class DiscussPostController implements CommunityConstant {
                     //把回复的目标放入replyMap
                     User targetUser = commentReply.getTargetId() == 0 ? null : userService.selectUserById(commentReply.getTargetId());
                     replyMap.put("targetUser", targetUser);
+                    //回复的点赞数量
+                    long replyLikeCount = likeService.findLikeCount(ENTITY_TYPE_COMMENT, commentReply.getId());
+                    replyMap.put("replyLikeCount", replyLikeCount);
+                    if (hostHolder.getUser() == null)
+                        replyMap.put("replyIsLike", 0);
+                    else
+                        replyMap.put("replyIsLike", likeService.isLike(hostHolder.getUser().getId(), ENTITY_TYPE_COMMENT, commentReply.getId()));
+
                     mapList2.add(replyMap);
                 }
             }

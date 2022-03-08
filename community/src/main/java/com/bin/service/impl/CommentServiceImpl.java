@@ -1,6 +1,5 @@
 package com.bin.service.impl;
 
-import com.bin.annotation.LoginRequired;
 import com.bin.bean.Comment;
 import com.bin.bean.CommunityConstant;
 import com.bin.dao.CommentMapper;

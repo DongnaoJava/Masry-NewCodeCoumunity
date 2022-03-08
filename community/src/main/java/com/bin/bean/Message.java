@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Data
 @AllArgsConstructor
-public class Message {
+public class Message implements CommunityConstant{
     private Integer id;
     private Integer fromId;
     private Integer toId;
@@ -16,6 +16,6 @@ public class Message {
     private Date createTime;
 
     public Message() {
-        status = 0;
+        status = MESSAGE_STATE_UNREAD;
     }
 }

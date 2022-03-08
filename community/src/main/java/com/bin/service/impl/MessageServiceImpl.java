@@ -64,4 +64,11 @@ public class MessageServiceImpl implements MessageService {
     public Integer updateOneMessageStatus(Integer id, Integer status) {
         return messageMapper.updateOneMessageStatus(id,status);
     }
+
+    @Override
+    public Integer insertNewMessage(Message message) {
+        if (message==null)
+            throw new IllegalArgumentException("参数非法！");
+        return messageMapper.insertNewMessage(message);
+    }
 }

@@ -10,10 +10,12 @@ import com.bin.util.CommunityUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -33,6 +35,8 @@ public class UserService implements UserMapper, CommunityConstant {
     private String domain;
     @Autowired
     private TicketServiceImpl ticketService;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     //根据id查询用户所有信息
     @Override
@@ -188,34 +192,39 @@ public class UserService implements UserMapper, CommunityConstant {
         loginTicket.setTicket(CommunityUtil.generateUUID());
         //账号有效状态为0，无效为1，与账号是否激活的status不是一个概念
         loginTicket.setStatus(0);
-        loginTicket.setExpired(new Date(System.currentTimeMillis()+expiredTime * 1000));
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredTime * 1000));
         ticketService.insertTicket(loginTicket);
 
-        mapInfo.put("ticket",loginTicket.getTicket());
+        mapInfo.put("ticket", loginTicket.getTicket());
         return mapInfo;
     }
 
     //用户第一次登录
-    public String firstLogin(String username, String password, Model model, HttpSession session,
+    public String firstLogin(String username, String password, Model model,
                              String verificationCode, HttpServletResponse response, boolean remember) {
         String target;
         int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
         Map<String, String> mapInfo = judgeUserLoginInfo(username, password, expiredTime);
         if (mapInfo.get("ticket") != null) {
-            String correctCode = (String) session.getAttribute("verificationCode");
+            String correctCode = (String) redisTemplate.opsForValue().get("verificationCode");
             if (verificationCode == null) {
                 model.addAttribute("codeInfo", "验证码不能为空！");
                 target = "login";
             } else {
-                if (!verificationCode.equalsIgnoreCase(correctCode)) {
-                    model.addAttribute("codeInfo", "验证码错误！");
+                if (correctCode == null) {
+                    model.addAttribute("codeInfo", "验证码已过期！");
                     target = "login";
                 } else {
-                    Cookie cookie = new Cookie("ticket", mapInfo.get("ticket"));
-                    cookie.setPath("/");
-                    cookie.setMaxAge(expiredTime);
-                    response.addCookie(cookie);
-                    target = "index";
+                    if (!verificationCode.equalsIgnoreCase(correctCode)) {
+                        model.addAttribute("codeInfo", "验证码错误！");
+                        target = "login";
+                    } else {
+                        Cookie cookie = new Cookie("ticket", mapInfo.get("ticket"));
+                        cookie.setPath("/");
+                        cookie.setMaxAge(expiredTime);
+                        response.addCookie(cookie);
+                        target = "index";
+                    }
                 }
             }
         } else {
@@ -227,8 +236,8 @@ public class UserService implements UserMapper, CommunityConstant {
     }
 
     //用户退出登录
-    public void logout(String ticket){
-      ticketService.updateStatusByTicket(ticket,1);
+    public void logout(String ticket) {
+        ticketService.updateStatusByTicket(ticket, 1);
     }
 }
 

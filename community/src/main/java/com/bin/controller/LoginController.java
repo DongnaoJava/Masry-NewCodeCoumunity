@@ -72,14 +72,14 @@ public class LoginController implements CommunityConstant {
     @PostMapping("/login")
     public String login(@CookieValue(value = "ticket", required = false) String ticket,
                         HttpServletResponse response, String username, String password,
-                        String verificationCode, Model model, HttpSession session, boolean remember) {
+                        String verificationCode, Model model,  boolean remember) {
         String target = null;
         if (StringUtils.isBlank(ticket)) {
             //说明第一次登陆
             int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
             Map<String, String> mapInfo = userService.judgeUserLoginInfo(username, password, expiredTime);
             if (mapInfo.get("ticket") != null)
-                target = userService.firstLogin(username, password, model, session, verificationCode, response, remember);
+                target = userService.firstLogin(username, password, model, verificationCode, response, remember);
         } else {
             //说明第二次登陆
             LoginTicket loginTicket = ticketService.selectByTicket(ticket);
@@ -87,9 +87,9 @@ public class LoginController implements CommunityConstant {
                 if (loginTicket.getExpired().after(new Date())) {
                     target = "index";
                 } else
-                    target = userService.firstLogin(username, password, model, session, verificationCode, response, remember);
+                    target = userService.firstLogin(username, password, model, verificationCode, response, remember);
             } else
-                target = userService.firstLogin(username, password, model, session, verificationCode, response, remember);
+                target = userService.firstLogin(username, password, model,  verificationCode, response, remember);
 
         }
         //到login（携带参数）get方式 return
