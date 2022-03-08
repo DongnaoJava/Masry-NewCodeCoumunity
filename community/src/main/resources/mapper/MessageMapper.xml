@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bin.dao.MessageMapper">
+    <sql id="selectFields">
+        id
+        ,from_id,to_id,conversation_id,content,status,create_time
+    </sql>
+    <select id="selectConversations" resultType="com.bin.bean.Message">
+        select <include refid="selectFields"></include>,MAX(create_time)
+        from message
+        where status!=2
+        and from_id!=1
+        and (to_id=#{userId} or from_id=#{userId})
+        group by conversation_id
+        order by create_time
+        desc
+        limit #{offset},#{limit}
+    </select>
+    <select id="selectConversationsRows" resultType="int">
+        select count(maxtime)
+        from (
+                 select MAX(create_time)
+                            as maxtime
+                 from message
+                 where status!=2
+            and from_id!=1
+            and (to_id = #{userId}
+                    or from_id=#{userId})
+                 group by conversation_id)
+                 as a
+    </select>
+    <select id="selectMessages" resultType="com.bin.bean.Message">
+        select
+        <include refid="selectFields"></include>
+        from message
+        where status!=2
+        and conversation_id=#{conversationId}
+        order by create_time
+        asc
+        limit #{offset},#{limit}
+    </select>
+    <select id="selectMessagesRows" resultType="int">
+        select count(id)
+        from message
+        where status!=2
+        and conversation_id=#{conversationId}
+    </select>
+    <select id="selectMessagesUnreadRows" resultType="int">
+        select count(id)
+        from message
+        <where>
+            from_id!=1
+            and status=0
+            and to_id=#{userId}
+            <if test="conversationId!=null">
+                and conversation_id= #{conversationId}
+            </if>
+        </where>
+    </select>
+    <update id="updateMessageStatus" >
+        update message
+        set status=#{status}
+        where conversation_id = #{conversationId}
+    </update>
+    <update id="updateOneMessageStatus" >
+        update message
+        set status=#{status}
+        where id = #{id}
+    </update>
+</mapper>
