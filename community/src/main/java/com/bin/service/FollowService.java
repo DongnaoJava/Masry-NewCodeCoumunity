@@ -5,9 +5,16 @@ import java.util.Map;
 
 public interface FollowService {
     void follow(Integer userId, Integer entityType, Integer entityId);
+
     void cancelFollow(Integer userId, Integer entityType, Integer entityId);
+
     Long getFollowerCount(Integer entityType, Integer entityId);
-    Long getFolloweeCount(Integer userId,Integer entityType);
+
+    Long getFolloweeCount(Integer userId, Integer entityType);
+
     Integer getStatusOfFollow(Integer userId, Integer entityType, Integer entityId);
-    List<Map<String, Object>> getFollowee(Integer userId, Integer entityType,Integer offset,Integer limit);
+
+    List<Map<String, Object>> getFollowee(Integer userId, Integer entityType, Integer offset, Integer limit);
+
+    List<Map<String, Object>> getFollower(Integer loginUserId, Integer entityId, Integer entityType, Integer offset, Integer limit);
 }

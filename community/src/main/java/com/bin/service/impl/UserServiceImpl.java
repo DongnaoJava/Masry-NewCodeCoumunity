@@ -7,6 +7,7 @@ import com.bin.bean.User;
 import com.bin.dao.UserMapper;
 import com.bin.util.MailSendUtil;
 import com.bin.util.CommunityUtil;
+import com.bin.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,9 +23,10 @@ import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
-public class UserService implements UserMapper, CommunityConstant {
+public class UserServiceImpl implements UserMapper, CommunityConstant {
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -33,8 +35,8 @@ public class UserService implements UserMapper, CommunityConstant {
     private TemplateEngine templateEngine;
     @Value("${community.path.domain}")
     private String domain;
-    @Autowired
-    private TicketServiceImpl ticketService;
+    /*@Autowired
+    private TicketServiceImpl ticketService;*/
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
@@ -187,26 +189,32 @@ public class UserService implements UserMapper, CommunityConstant {
             }
         }
 
+        //生成登陆凭证
         LoginTicket loginTicket = new LoginTicket();
         loginTicket.setUserId(user.getId());
         loginTicket.setTicket(CommunityUtil.generateUUID());
         //账号有效状态为0，无效为1，与账号是否激活的status不是一个概念
         loginTicket.setStatus(0);
         loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredTime * 1000));
-        ticketService.insertTicket(loginTicket);
+        //ticketService.insertTicket(loginTicket);
 
+        //loginTicket保存在redis中
+        String ticketKey = RedisKeyUtil.getTicketKey(loginTicket.getTicket());
+        redisTemplate.opsForValue().set(ticketKey,loginTicket);
+        redisTemplate.expire(ticketKey,60, TimeUnit.MINUTES);
         mapInfo.put("ticket", loginTicket.getTicket());
         return mapInfo;
     }
 
     //用户第一次登录
-    public String firstLogin(String username, String password, Model model,
+    public String firstLogin(String username, String password, Model model,String verificationCodeOwner,
                              String verificationCode, HttpServletResponse response, boolean remember) {
         String target;
         int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
         Map<String, String> mapInfo = judgeUserLoginInfo(username, password, expiredTime);
         if (mapInfo.get("ticket") != null) {
-            String correctCode = (String) redisTemplate.opsForValue().get("verificationCode");
+            String verificationCodeKey = RedisKeyUtil.getVerificationCodeKey(verificationCodeOwner);
+            String correctCode = (String) redisTemplate.opsForValue().get(verificationCodeKey);
             if (verificationCode == null) {
                 model.addAttribute("codeInfo", "验证码不能为空！");
                 target = "login";
@@ -237,7 +245,22 @@ public class UserService implements UserMapper, CommunityConstant {
 
     //用户退出登录
     public void logout(String ticket) {
-        ticketService.updateStatusByTicket(ticket, 1);
+        //ticketService.updateStatusByTicket(ticket, 1);
+        //将loginTicket的状态改为1
+        updateLoginTicketStatus(ticket,1);
+    }
+
+    public LoginTicket selectByTicket(String ticket){
+        String ticketKey = RedisKeyUtil.getTicketKey(ticket);
+        return (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
+    }
+    public void updateLoginTicketStatus(String ticket,Integer status){
+        String ticketKey = RedisKeyUtil.getTicketKey(ticket);
+        LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
+        if(loginTicket==null)
+            throw new IllegalArgumentException("redis数据库发生错误！");
+        loginTicket.setStatus(status);
+        redisTemplate.opsForValue().set(ticketKey,loginTicket);
     }
 }
 

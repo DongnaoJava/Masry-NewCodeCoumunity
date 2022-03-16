@@ -3,7 +3,7 @@ package com.bin.TestPackage;
 import com.bin.bean.DiscussPost;
 import com.bin.bean.User;
 import com.bin.service.impl.DiscussPostServiceImpl;
-import com.bin.service.impl.UserService;
+import com.bin.service.impl.UserServiceImpl;
 import com.bin.util.CommunityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.Date;
 @Service
 public class TransactionServiceTest {
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
     private DiscussPostServiceImpl discussPostService;
     @Autowired
@@ -36,7 +36,7 @@ public class TransactionServiceTest {
         user.setActivationCode(CommunityUtil.generateUUID());
         user.setHeaderUrl("http://api.btstu.cn/sjtx/api.php?lx=c1&format=images");
         user.setCreateTime(new Date());
-        userService.insertUser(user);
+        userServiceImpl.insertUser(user);
         //自动发送第一条帖子
         DiscussPost discussPost = new DiscussPost();
         discussPost.setTitle("我是ALPHER，新人一个！");
@@ -64,7 +64,7 @@ public class TransactionServiceTest {
                 user.setActivationCode(CommunityUtil.generateUUID());
                 user.setHeaderUrl("http://api.btstu.cn/sjtx/api.php?lx=c1&format=images");
                 user.setCreateTime(new Date());
-                userService.insertUser(user);
+                userServiceImpl.insertUser(user);
                 //自动发送第一条帖子
                 DiscussPost discussPost = new DiscussPost();
                 discussPost.setTitle("我是BETA，新人一个！");

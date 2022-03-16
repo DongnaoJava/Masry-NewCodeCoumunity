@@ -1,5 +1,6 @@
 package com.bin.service.impl;
 
+import com.bin.bean.CommunityConstant;
 import com.bin.service.FollowService;
 import com.bin.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,11 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class FollowServiceImpl implements FollowService {
+public class FollowServiceImpl implements FollowService, CommunityConstant {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     //关注
     @Override
@@ -109,17 +110,42 @@ public class FollowServiceImpl implements FollowService {
 
     //获取用户关注的所有对象
     @Override
-    public List<Map<String, Object>> getFollowee(Integer userId, Integer entityType,Integer offset,Integer limit) {
+    public List<Map<String, Object>> getFollowee(Integer userId, Integer entityType, Integer offset, Integer limit) {
         String redisFolloweeKey = RedisKeyUtil.getRedisFolloweeKey(userId, entityType);
-        Set<Object> entityIds = redisTemplate.opsForZSet().reverseRange(redisFolloweeKey, offset, offset+limit-1);
+        Set<Object> entityIds = redisTemplate.opsForZSet().reverseRange(redisFolloweeKey, offset, offset + limit - 1);
         List<Map<String, Object>> mapList = new ArrayList<>();
         if (entityIds != null)
             for (Object entityId : entityIds) {
                 Map<String, Object> map = new HashMap<>();
                 //目前只考虑了人
-                map.put("user", userService.selectUserById((Integer) entityId));
+                map.put("user", userServiceImpl.selectUserById((Integer) entityId));
                 long score = Objects.requireNonNull(redisTemplate.opsForZSet().score(redisFolloweeKey, entityId)).longValue();
                 map.put("createTime", new Date(score));
+                mapList.add(map);
+            }
+        return mapList;
+    }
+
+    //获取关注对象的所有用户
+    @Override
+    public List<Map<String, Object>> getFollower(Integer loginUserId, Integer entityId, Integer entityType, Integer offset, Integer limit) {
+        String redisFollowerKey = RedisKeyUtil.getRedisFollowerKey(entityType, entityId);
+        Set<Object> userIds = redisTemplate.opsForZSet().reverseRange(redisFollowerKey, offset, offset + limit - 1);
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        if (userIds != null)
+            for (Object userId : userIds) {
+                Map<String, Object> map = new HashMap<>();
+
+                //所有的粉丝
+                map.put("user", userServiceImpl.selectUserById((Integer) userId));
+                long score = Objects.requireNonNull(redisTemplate.opsForZSet().score(redisFollowerKey, userId)).longValue();
+                map.put("createTime", new Date(score));
+
+                if (loginUserId != null) {
+                    //查看是否关注用户(登录用户为查看对象)
+                    Integer follow = getStatusOfFollow(loginUserId, ENTITY_TYPE_USER, (Integer) userId);
+                    map.put("follow", follow);
+                }
                 mapList.add(map);
             }
         return mapList;

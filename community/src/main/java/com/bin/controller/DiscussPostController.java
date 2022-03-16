@@ -5,10 +5,9 @@ import com.bin.bean.*;
 import com.bin.service.impl.CommentServiceImpl;
 import com.bin.service.impl.DiscussPostServiceImpl;
 import com.bin.service.impl.LikeServiceImpl;
-import com.bin.service.impl.UserService;
+import com.bin.service.impl.UserServiceImpl;
 import com.bin.util.CommunityUtil;
 import com.bin.util.HostHolder;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,7 +24,7 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private DiscussPostServiceImpl discussPostService;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
     private CommentServiceImpl commentService;
     @Autowired
@@ -56,7 +55,7 @@ public class DiscussPostController implements CommunityConstant {
         model.addAttribute("postDetail", postDetail);
 
         //作者
-        User user = userService.selectUserById(postDetail.getUserId());
+        User user = userServiceImpl.selectUserById(postDetail.getUserId());
         model.addAttribute("user", user);
 
         //点赞
@@ -83,7 +82,7 @@ public class DiscussPostController implements CommunityConstant {
             //把评论放入commentMap
             commentMap.put("comment", comment);
             //评论的作者放入commentMap
-            User commentUser = userService.selectUserById(comment.getUserId());
+            User commentUser = userServiceImpl.selectUserById(comment.getUserId());
             commentMap.put("commentUser", commentUser);
             //评论的点赞数量
             long commentLikeCount = likeService.findLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
@@ -103,10 +102,10 @@ public class DiscussPostController implements CommunityConstant {
                     //把回复放入replyMap
                     replyMap.put("reply", commentReply);
                     //把回复的作者放入replyMap
-                    User replyUser = userService.selectUserById(commentReply.getUserId());
+                    User replyUser = userServiceImpl.selectUserById(commentReply.getUserId());
                     replyMap.put("replyUser", replyUser);
                     //把回复的目标放入replyMap
-                    User targetUser = commentReply.getTargetId() == 0 ? null : userService.selectUserById(commentReply.getTargetId());
+                    User targetUser = commentReply.getTargetId() == 0 ? null : userServiceImpl.selectUserById(commentReply.getTargetId());
                     replyMap.put("targetUser", targetUser);
                     //回复的点赞数量
                     long replyLikeCount = likeService.findLikeCount(ENTITY_TYPE_COMMENT, commentReply.getId());

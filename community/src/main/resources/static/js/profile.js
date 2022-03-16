@@ -5,6 +5,7 @@ $(function () {
 function follow() {
     var btn = this;
     const userId = $("#userId").val();
+    const followerOrFollowee = $("#followerOrFollowee").val();
     if ($(btn).hasClass("btn-info")) {
         // 关注TA
         $.post(
@@ -25,9 +26,14 @@ function follow() {
             {"entityType": 0, "entityId": userId},
             function (data) {
                 data = $.parseJSON(data);
-                if (data.code == 1)
-                    $(btn).text("关注TA").removeClass("btn-secondary").addClass("btn-info");
-                else
+                if (data.code == 1) {
+                    {
+                        if ( "followee"===window.location.reload())
+                            window.location.reload();
+                        else
+                            $(btn).text("关注TA").removeClass("btn-secondary").addClass("btn-info");
+                    }
+                } else
                     alert(data.code + ":" + data.msg);
             }
         )

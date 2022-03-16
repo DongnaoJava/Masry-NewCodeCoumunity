@@ -5,7 +5,7 @@ import com.bin.bean.Page;
 import com.bin.bean.User;
 import com.bin.service.impl.FollowServiceImpl;
 import com.bin.service.impl.LikeServiceImpl;
-import com.bin.service.impl.UserService;
+import com.bin.service.impl.UserServiceImpl;
 import com.bin.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,7 +19,7 @@ import java.util.Map;
 @Controller
 public class ProfileController implements CommunityConstant {
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
     private LikeServiceImpl likeService;
     @Autowired
@@ -30,11 +30,14 @@ public class ProfileController implements CommunityConstant {
     @GetMapping("/profile/{userId}")
     public String getProfile(@PathVariable("userId") Integer userId, Model model) {
         //查看用户的id
-        User user = userService.selectUserById(userId);
+        User user = userServiceImpl.selectUserById(userId);
         //登陆用户的id
-        Integer loginUserId = hostHolder.getUser().getId();
-
+        Integer loginUserId=-1;
+        if (hostHolder.getUser() != null)
+            loginUserId = hostHolder.getUser().getId();
+        //查看的用户
         model.addAttribute("user", user);
+        //登录用户
         model.addAttribute("loginUserId", loginUserId);
         model.addAttribute("userGetLikeCount", likeService.findUserGetLikeCount(userId));
         //粉丝数量
@@ -50,14 +53,46 @@ public class ProfileController implements CommunityConstant {
         return "/site/profile";
     }
 
-    @GetMapping("/followee/{userId}")
-    public String getFollowee(@PathVariable("userId") Integer userId, Model model,Page page) {
-        Long followeeCount = followService.getFolloweeCount(userId, ENTITY_TYPE_USER);
+    @GetMapping("/followee/{targetUserId}")
+    public String getFollowee(@PathVariable("targetUserId") Integer targetUserId, Model model, Page page) {
+        //targetUserId是查看的目标用户
+        Long followeeCount = followService.getFolloweeCount(targetUserId, ENTITY_TYPE_USER);
         page.setRows(followeeCount.intValue());
-        page.setPath("/followee/" + userId);
+        page.setPath("/followee/" + targetUserId);
 
-        List<Map<String, Object>> followee = followService.getFollowee(userId, ENTITY_TYPE_USER, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> followee = followService.getFollowee(targetUserId, ENTITY_TYPE_USER, page.getOffset(), page.getLimit());
+        //所有的关注对象
         model.addAttribute("mapList", followee);
+        //查看的目标用户
+        model.addAttribute("targetUser", userServiceImpl.selectUserById(targetUserId));
+
+        //登陆用户的id
+        Integer loginUserId = -1;
+        if (hostHolder.getUser() != null)
+            loginUserId = hostHolder.getUser().getId();
+
+        model.addAttribute("loginUserId", loginUserId);
         return "/site/followee";
+    }
+
+    @GetMapping("/follower/{targetUserId}")
+    public String getFollower(@PathVariable("targetUserId") Integer targetUserId, Model model, Page page) {
+        //targetUserId是查看的目标用户
+        Long followerCount = followService.getFollowerCount(ENTITY_TYPE_USER, targetUserId);
+        page.setRows(followerCount.intValue());
+        page.setPath("/follower/" + targetUserId);
+
+        //登陆用户的id
+        Integer loginUserId = -1;
+        if (hostHolder.getUser() != null)
+            loginUserId = hostHolder.getUser().getId();
+        model.addAttribute("loginUserId", loginUserId);
+
+        List<Map<String, Object>> follower = followService.getFollower(loginUserId, targetUserId, ENTITY_TYPE_USER, page.getOffset(), page.getLimit());
+        model.addAttribute("mapList", follower);
+        //查看的目标用户
+        model.addAttribute("targetUser", userServiceImpl.selectUserById(targetUserId));
+
+        return "/site/follower";
     }
 }

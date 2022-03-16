@@ -4,7 +4,7 @@ import com.bin.bean.LoginTicket;
 import com.bin.bean.User;
 import com.bin.service.impl.MessageServiceImpl;
 import com.bin.service.impl.TicketServiceImpl;
-import com.bin.service.impl.UserService;
+import com.bin.service.impl.UserServiceImpl;
 import com.bin.util.CookieUtil;
 import com.bin.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -20,12 +20,12 @@ import java.util.Date;
 
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
-    @Autowired
-    private TicketServiceImpl ticketService;
+   /* @Autowired
+    private TicketServiceImpl ticketService;*/
     @Autowired
     private HostHolder hostHolder;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
     private MessageServiceImpl messageService;
 
@@ -35,10 +35,10 @@ public class LoginInterceptor implements HandlerInterceptor {
         String ticket = CookieUtil.getValueByKeyFromCookie("ticket", cookies);
         if (!StringUtils.isBlank(ticket)) {
             //已经登陆过了
-            LoginTicket loginTicket = ticketService.selectByTicket(ticket);
+            LoginTicket loginTicket = userServiceImpl.selectByTicket(ticket);
             if (loginTicket != null && loginTicket.getExpired().after(new Date()) && loginTicket.getStatus() == 0) {
                 //登陆过了，且登录信息没有过期
-                User user = userService.selectUserById(loginTicket.getUserId());
+                User user = userServiceImpl.selectUserById(loginTicket.getUserId());
                 hostHolder.setUser(user);
             }
         }

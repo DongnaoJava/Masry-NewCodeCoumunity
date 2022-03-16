@@ -6,6 +6,8 @@ public class RedisKeyUtil {
     private final static String PREFIX_USER_LIKE = "like:user";
     private final static String PREFIX_FOLLOWER = "follower:user";
     private final static String PREFIX_FOLLOWEE = "followee:user";
+    private final static String PREFIX_VERIFICATION_CODE = "verificationCode";
+    private final static String PREFIX_TICKET = "ticket";
 
     //帖子评论获得的赞
     //like:entity:entityType:entityId
@@ -26,5 +28,14 @@ public class RedisKeyUtil {
     //follower:user:userId 某个用户关注的实体
     public static String getRedisFolloweeKey(Integer userId, Integer entityType) {
         return PREFIX_FOLLOWEE + SPLIT + userId + SPLIT + entityType;
+    }
+
+    //verificationCode:owner 验证码
+    public static String getVerificationCodeKey(String verificationCodeOwner) {
+        return PREFIX_VERIFICATION_CODE + SPLIT + verificationCodeOwner;
+    }
+    //verificationCode:owner 验证码
+    public static String getTicketKey(String ticket) {
+        return PREFIX_TICKET + SPLIT + ticket;
     }
 }

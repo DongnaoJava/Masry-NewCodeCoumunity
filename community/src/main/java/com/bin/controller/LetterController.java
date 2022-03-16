@@ -5,7 +5,7 @@ import com.bin.bean.Message;
 import com.bin.bean.Page;
 import com.bin.bean.User;
 import com.bin.service.impl.MessageServiceImpl;
-import com.bin.service.impl.UserService;
+import com.bin.service.impl.UserServiceImpl;
 import com.bin.util.CommunityUtil;
 import com.bin.util.HostHolder;
 import com.bin.util.SensitiveFilter;
@@ -28,7 +28,7 @@ public class LetterController implements CommunityConstant {
     @Autowired
     private HostHolder hostHolder;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
     private SensitiveFilter sensitiveFilter;
 
@@ -45,7 +45,7 @@ public class LetterController implements CommunityConstant {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (Message message : conversationList) {
             Integer anotherId = message.getFromId().equals(userId) ? message.getToId() : message.getFromId();
-            User anotherUser = userService.selectUserById(anotherId);
+            User anotherUser = userServiceImpl.selectUserById(anotherId);
             String conversationId = getConversationId(anotherId,userId);
             Integer messageCount = messageService.selectMessagesRows(conversationId);
             Integer unreadMessageCount = messageService.selectMessagesUnreadRows(userId, conversationId);
@@ -55,7 +55,7 @@ public class LetterController implements CommunityConstant {
             //会话的最新的那一条消息数据
             map.put("message", message);
             //放入消息的发送者，由于是消息，所以有可能是登陆账号发送出去的
-            map.put("messageSendUser",userService.selectUserById(message.getFromId()));
+            map.put("messageSendUser", userServiceImpl.selectUserById(message.getFromId()));
             //会话中总共包括的消息数量
             map.put("messageCount", messageCount);
             //会话中未读的消息数量
@@ -73,7 +73,7 @@ public class LetterController implements CommunityConstant {
         User toUser = hostHolder.getUser();
         if(toUser==null)
             return "redirect:index";
-        User fromUser = userService.selectUserById(fromUserId);
+        User fromUser = userServiceImpl.selectUserById(fromUserId);
         Integer userId = toUser.getId();
         String conversationId = getConversationId(fromUserId,userId);
         Integer messageCount = messageService.selectMessagesRows(conversationId);
@@ -87,7 +87,7 @@ public class LetterController implements CommunityConstant {
             //把消息的内容放入
             map.put("message", message);
             //放入消息的发送者，由于是消息，所以有可能是登陆账号发送出去的
-            map.put("fromUser", userService.selectUserById(message.getFromId()));
+            map.put("fromUser", userServiceImpl.selectUserById(message.getFromId()));
             //账号登陆者
             map.put("userMe", toUser);
             messageMapList.add(map);
@@ -111,7 +111,7 @@ public class LetterController implements CommunityConstant {
         if (StringUtils.isBlank(recipientName) || StringUtils.isBlank(messageText))
             return CommunityUtil.getJSONString("403", "标题和内容都不能为空！");
         //接收者
-        User recipient = userService.selectUserByName(recipientName);
+        User recipient = userServiceImpl.selectUserByName(recipientName);
         if (recipient == null)
             return CommunityUtil.getJSONString("403", "您要发送私信的用户不存在！");
 
