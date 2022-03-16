@@ -13,5 +13,5 @@ public interface CommentService {
      * 插入一条评论或者回复
      */
     int insertComment(Comment comment);
-
+    Comment selectCommentById(Integer id);
 }

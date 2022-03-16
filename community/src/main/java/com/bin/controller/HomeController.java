@@ -52,4 +52,5 @@ public class HomeController implements CommunityConstant {
     public String getError(){
         return "error/500";
     }
+
 }

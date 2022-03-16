@@ -1,13 +1,15 @@
 package com.bin.community;
 
+import com.bin.service.impl.FollowServiceImpl;
 import com.bin.service.impl.LikeServiceImpl;
+import com.bin.util.RedisKeyUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.*;
 
-import java.util.Set;
+import java.util.*;
 
 @SpringBootTest
 public class RedisTest {
@@ -15,6 +17,8 @@ public class RedisTest {
     RedisTemplate<String, Object> redisTemplate;
     @Autowired
     LikeServiceImpl likeService;
+    @Autowired
+    private FollowServiceImpl followService;
 
     @Test
     public void test01() {
@@ -64,6 +68,5 @@ public class RedisTest {
     }
     @Test
     public void test05(){
-        System.out.println(likeService.findLikeCount(1,166));
     }
 }

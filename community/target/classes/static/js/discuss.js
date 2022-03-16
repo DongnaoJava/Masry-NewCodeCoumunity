@@ -16,3 +16,6 @@ function like(btn, entityType, entityId) {
         }
     )
 }
+function findProfile(userId){
+    location.href="http://localhost:8080/profile/"+userId;
+}

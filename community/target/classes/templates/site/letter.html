@@ -122,7 +122,7 @@
 				<ul class="list-unstyled" th:each="messageMap:${messageList}" >
 					<li class="media pb-3 pt-3 mb-3 border-bottom position-relative">
 						<span class="badge badge-danger" th:if="${messageMap.unreadMessageCount!=0}" th:text="${messageMap.unreadMessageCount}">3</span>
-						<a href="profile.html">
+						<a th:href="@{|/profile/${messageMap.fromUser.id}|}">
 							<img th:src="${messageMap.fromUser.headerUrl}" class="mr-4 rounded-circle user-header" alt="用户头像" >
 						</a>
 						<div class="media-body">

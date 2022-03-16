@@ -81,18 +81,20 @@
             </h6>
             <!-- 作者 -->
             <div class="media pb-3 border-bottom">
-                <a href="profile.html">
+                <a th:href="@{|/profile/${user.id}|}">
                     <img th:src="${user.getHeaderUrl()}" class="align-self-start mr-4 rounded-circle user-header"
                          alt="用户头像">
                 </a>
                 <div class="media-body">
-                    <div class="mt-0 text-warning" th:text="${user.getUsername()}">寒江雪</div>
+                    <a href="javascript:;" th:onclick="|findProfile(${user.id});|">
+                         <div class="mt-0 text-warning" th:text="${user.getUsername()}">寒江雪</div>
+                    </a>
                     <div class="text-muted mt-3">
                         发布于 <b th:text="${#dates.format(postDetail.getCreateTime(),'yyyy-MM-dd HH:mm:ss')}">2019-04-15
                         15:32:18</b>
                         <ul class="d-inline float-right">
                             <li class="d-inline ml-2">
-                                <a id="postLike" href="javascript:;" th:onclick="|like(this,1,${postDetail.id});|"
+                                <a href="javascript:;" th:onclick="|like(this,1,${postDetail.id});|"
                                    class="text-primary">
                                     <b th:text="${postIsLike==1?'已赞':'赞'}">赞</b>
                                     <i id="postLikeCount" th:text="${postLikeCount}"></i>
@@ -130,14 +132,17 @@
             <ul id="commentLi" class="list-unstyled mt-4">
                 <!-- 第1条回帖 -->
                 <li class="media pb-3 pt-3 mb-3 border-bottom" th:each="commentMap:${commentMap}">
-                    <a href="profile.html">
+                    <a th:href="@{|/profile/${commentMap.commentUser.id}|}">
                         <img th:src="${commentMap.commentUser.headerUrl}"
                              class="align-self-start mr-4 rounded-circle user-header" alt="用户头像">
                     </a>
                     <div class="media-body">
                         <div class="mt-0">
-                            <span class="font-size-12 text-success"
-                                  th:utext="${commentMap.commentUser.username}">掉脑袋切切</span>
+                            <a href="javascript:;" th:onclick="|findProfile(${commentMap.commentUser.id});|">
+                                 <span class="font-size-12 text-success"
+                                  th:utext="${commentMap.commentUser.username}">掉脑袋切切
+                                 </span>
+                            </a>
                             <span class="badge badge-secondary float-right floor"><i
                                     th:text="${page.offset+commentMapStat.count}">1</i>#</span>
                         </div>
@@ -149,7 +154,7 @@
                                     th:text="${#dates.format(commentMap.comment.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
                             <ul class="d-inline float-right">
                                 <li class="d-inline ml-2">
-                                    <a id="commentLike" href="javascript:;" class="text-primary"
+                                    <a href="javascript:;" class="text-primary"
                                        th:onclick="|like(this,2,${commentMap.comment.id});|">
                                         <b th:text="${commentMap.commentIsLike==1?'已赞':'赞'}">赞</b>
                                         <i id="commentLikeCount" th:text="${commentMap.commentLikeCount}"></i>
@@ -164,22 +169,29 @@
                         <!-- 回复列表 -->
                         <ul class="list-unstyled mt-4 bg-gray py-0 px-3 font-size-12 text-muted">
                             <!-- 第1条回复 -->
-                            <li id="replyLi" class="pb-3 pt-3 mb-3 border-bottom"
+                            <li class="pb-3 pt-3 mb-3 border-bottom"
                                 th:each="replyMap:${commentMap.replyList}">
                                 <div>
 										<span th:if="${replyMap.targetUser==null}">
-											<b class="text-info" th:utext="${replyMap.replyUser.username}">寒江雪</b>:&nbsp;&nbsp;</span>
+											<a href="javascript:;" th:onclick="|findProfile(${replyMap.replyUser.id});|">
+                                                <b class="text-info" th:utext="${replyMap.replyUser.username}">寒江雪</b>
+                                            </a>:
+                                        </span>
                                     <span th:if="${replyMap.targetUser!=null}">
-											<b class="text-info" th:utext="${replyMap.replyUser.username}">寒江雪</b>  回复
-											<b class="text-info" th:utext="${replyMap.targetUser.username}"></b>:&nbsp;&nbsp; </span>
+                                        <a href="javascript:;" th:onclick="|findProfile(${replyMap.replyUser.id});|">
+											<b class="text-info" th:utext="${replyMap.replyUser.username}">寒江雪</b>
+                                        </a>  回复
+                                        <a href="javascript:;" th:onclick="|findProfile(${replyMap.targetUser.id});|">
+											<b class="text-info" th:utext="${replyMap.targetUser.username}"></b>
+                                        </a>:
+                                    </span>
                                     <span th:utext="${replyMap.reply.content}">这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~</span>
                                 </div>
                                 <div class="mt-3">
                                     <span th:text="${#dates.format(replyMap.reply.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
                                     <ul class="d-inline float-right">
                                         <li class="d-inline ml-2">
-                                            <a id="replyLike" href="javascript:;" class="text-primary"
-                                               th:onclick="|like(this,2,${replyMap.reply.id});|">
+                                            <a href="javascript:;" class="text-primary" th:onclick="|like(this,2,${replyMap.reply.id});|">
                                                 <b th:text="${replyMap.replyIsLike==1?'已赞':'赞'}">赞</b>
                                                 <i id="replyLikeCount" th:text="${replyMap.replyLikeCount}"></i>
                                             </a>

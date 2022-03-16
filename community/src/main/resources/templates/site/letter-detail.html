@@ -129,7 +129,7 @@
             <!-- 私信列表 -->
             <ul class="list-unstyled mt-4" th:each="messageMap:${messageMapList}">
                 <li class="media pb-3 pt-3 mb-2" id="media">
-                    <a href="profile.html">
+                    <a th:href="@{|/profile/${messageMap.fromUser.id}|}">
                         <img th:src="${messageMap.fromUser.headerUrl}" th:if="${messageMap.fromUser.id!=messageMap.userMe.id}" class="mr-4 rounded-circle user-header"
                              alt="用户头像">
                     </a>
@@ -161,7 +161,7 @@
                             君不见, 黄河之水天上来, 奔流到海不复回!
                         </div>
                     </div>
-                    <a href="profile.html">
+                    <a th:href="@{|/profile/${messageMap.fromUser.id}|}">
                         <img th:src="${messageMap.fromUser.headerUrl}" th:if="${messageMap.fromUser.id==messageMap.userMe.id}" class="ml-4 rounded-circle user-header"
                              alt="用户头像">
                     </a>
