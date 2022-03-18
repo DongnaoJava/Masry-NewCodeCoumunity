@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Map;
@@ -69,27 +70,20 @@ public class LoginController implements CommunityConstant {
 
     @PostMapping("/login")
     public String login(@CookieValue(value = "ticket", required = false) String ticket,
-                        @CookieValue(value = "verificationCodeOwner",required = false) String verificationCodeOwner,
+                        @CookieValue(value = "verificationCodeOwner", required = false) String verificationCodeOwner,
                         HttpServletResponse response, String username, String password,
-                        String verificationCode, Model model,  boolean remember) {
-        String target = null;
+                        String verificationCode, Model model, boolean remember) {
+        String target;
         if (StringUtils.isBlank(ticket)) {
             //说明第一次登陆
-            int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
-            Map<String, String> mapInfo = userServiceImpl.judgeUserLoginInfo(username, password, expiredTime);
-            if (mapInfo.get("ticket") != null)
-                target = userServiceImpl.firstLogin(username, password, model,verificationCodeOwner, verificationCode, response, remember);
+                target = userServiceImpl.firstLogin(username, password, model, verificationCodeOwner, verificationCode, response, remember);
         } else {
             //说明第二次登陆
             LoginTicket loginTicket = userServiceImpl.selectByTicket(ticket);
-            if (loginTicket != null) {
-                if (loginTicket.getExpired().after(new Date())&&loginTicket.getStatus()==0) {
-                    target = "index";
-                } else
-                    target = userServiceImpl.firstLogin(username, password, model,verificationCodeOwner, verificationCode, response, remember);
+            if (loginTicket != null && loginTicket.getExpired().after(new Date()) && loginTicket.getStatus() == 0) {
+                target = "index";
             } else
                 target = userServiceImpl.firstLogin(username, password, model, verificationCodeOwner, verificationCode, response, remember);
-
         }
         //到login（携带参数）get方式 return
         if ("login".equals(target)) {
@@ -101,7 +95,8 @@ public class LoginController implements CommunityConstant {
         else
             return "redirect:index";
     }
-//退出登录!
+
+    //退出登录!
     @GetMapping("/logout")
     public String logout(@CookieValue(value = "ticket", required = false) String ticket, Model model) {
         if (ticket == null) {

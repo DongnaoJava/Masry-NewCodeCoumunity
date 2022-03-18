@@ -2,7 +2,9 @@ package com.bin.controller.Interceptor;
 
 import com.bin.bean.LoginTicket;
 import com.bin.bean.User;
+import com.bin.service.NoticeService;
 import com.bin.service.impl.MessageServiceImpl;
+import com.bin.service.impl.NoticeServiceImpl;
 import com.bin.service.impl.TicketServiceImpl;
 import com.bin.service.impl.UserServiceImpl;
 import com.bin.util.CookieUtil;
@@ -20,14 +22,16 @@ import java.util.Date;
 
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
-   /* @Autowired
-    private TicketServiceImpl ticketService;*/
+    /* @Autowired
+     private TicketServiceImpl ticketService;*/
     @Autowired
     private HostHolder hostHolder;
     @Autowired
     private UserServiceImpl userServiceImpl;
     @Autowired
     private MessageServiceImpl messageService;
+    @Autowired
+    private NoticeServiceImpl noticeService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -51,7 +55,11 @@ public class LoginInterceptor implements HandlerInterceptor {
         if (modelAndView != null && user != null) {
             modelAndView.addObject("loginUser", user);
             //所有的未读消息的数量
-            modelAndView.addObject("unreadAllMessageCount", messageService.selectAllMessagesUnreadRows(user.getId()));
+            Integer unreadAllLetterCount = messageService.selectAllMessagesUnreadRows(user.getId());
+            modelAndView.addObject("unreadAllLetterCount", unreadAllLetterCount);
+            Integer unreadAllNoticeCount = noticeService.selectUnreadNoticesRows(user.getId());
+            modelAndView.addObject("unreadAllNoticeCount", unreadAllNoticeCount);
+            modelAndView.addObject("unreadAllMessageCount", unreadAllLetterCount + unreadAllNoticeCount);
         }
     }
 

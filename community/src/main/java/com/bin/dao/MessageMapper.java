@@ -11,7 +11,7 @@ public interface MessageMapper {
     //查询当前用户会话列表，每个列表只显示最新的一条消息
     List<Message> selectConversations(Integer userId, Integer offset, Integer limit);
 
-    //嘻哈寻当前用户的会话数量
+    //查寻当前用户的会话数量
     Integer selectConversationsRows(Integer userId);
 
     //查询某个私信的会话列表

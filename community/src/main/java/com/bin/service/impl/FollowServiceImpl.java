@@ -1,6 +1,9 @@
 package com.bin.service.impl;
 
 import com.bin.bean.CommunityConstant;
+import com.bin.bean.Event;
+import com.bin.bean.Page;
+import com.bin.event.EventProducer;
 import com.bin.service.FollowService;
 import com.bin.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,8 @@ public class FollowServiceImpl implements FollowService, CommunityConstant {
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private UserServiceImpl userServiceImpl;
+    @Autowired
+    private EventProducer eventProducer;
 
     //关注
     @Override
@@ -25,16 +30,27 @@ public class FollowServiceImpl implements FollowService, CommunityConstant {
         String redisFolloweeKey = RedisKeyUtil.getRedisFolloweeKey(userId, entityType);
         String redisFollowerKey = RedisKeyUtil.getRedisFollowerKey(entityType, entityId);
 
+        long time = new Date().getTime();
         redisTemplate.execute(new SessionCallback<Object>() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
                 operations.multi();
-                long time = new Date().getTime();
+                //userId为关注发起者
                 operations.opsForZSet().add(redisFolloweeKey, entityId, time);
                 operations.opsForZSet().add(redisFollowerKey, userId, time);
                 return operations.exec();
             }
         });
+
+        //系统给用户发送通知
+        Event event = new Event()
+                .setUserId(entityId)
+                .setCreateTime(new Date(time))
+                .setEntityId(entityId)
+                .setEntityType(entityType)
+                .setEntityUserId(userId)
+                .setTopic(TOPIC_FOLLOW);
+        eventProducer.sendEvent(event);
     }
 
     //取消关注

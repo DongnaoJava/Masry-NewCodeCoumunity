@@ -1,7 +1,7 @@
-function like(btn, entityType, entityId) {
+function like(btn, entityType, entityId, discussPostId) {
     $.post(
         "/like",
-        {"entityId": entityId, "entityType": entityType},
+        {"entityId": entityId, "entityType": entityType, "discussPostId":discussPostId},
         function (data) {
             data = $.parseJSON(data);
             if (data.code == 1) {
@@ -16,6 +16,7 @@ function like(btn, entityType, entityId) {
         }
     )
 }
-function findProfile(userId){
-    location.href="http://localhost:8080/profile/"+userId;
+
+function findProfile(userId) {
+    location.href = "http://localhost:8080/profile/" + userId;
 }

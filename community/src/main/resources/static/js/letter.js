@@ -19,7 +19,7 @@ function send_letter() {
 				$("#hintModal").modal("hide");
 				//刷新页面
 				if (data.code == 0) {
-					window.location.reload();
+					$(".media").remove();
 				}
 			}, 2000);
 		}

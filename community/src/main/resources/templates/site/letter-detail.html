@@ -74,6 +74,7 @@
                 </div>
                 <div class="col-4 text-right">
                     <input type="hidden" id="currentPage" th:value="${currentPage}">
+                    <input type="hidden" id="loginUserId" th:value="${loginUserId}">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="back();">返回</button>
                     <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#sendModal">
                         给TA私信
@@ -128,7 +129,7 @@
 
             <!-- 私信列表 -->
             <ul class="list-unstyled mt-4" th:each="messageMap:${messageMapList}">
-                <li class="media pb-3 pt-3 mb-2" id="media">
+                <li class="media pb-3 pt-3 mb-2">
                     <a th:href="@{|/profile/${messageMap.fromUser.id}|}">
                         <img th:src="${messageMap.fromUser.headerUrl}" th:if="${messageMap.fromUser.id!=messageMap.userMe.id}" class="mr-4 rounded-circle user-header"
                              alt="用户头像">
@@ -258,7 +259,8 @@
 <script>
     function back() {
         const currentPage=$("#currentPage").val();
-        location.href = "http://localhost:8080/letter?current="+currentPage;
+        const loginUserId=$("#loginUserId").val();
+        location.href = "http://localhost:8080/letter/"+loginUserId+"?current="+currentPage;
     }
 </script>
 </body>

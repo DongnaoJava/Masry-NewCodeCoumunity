@@ -8,9 +8,7 @@ import javax.servlet.http.Cookie;
 public class CookieUtil {
     public static String getValueByKeyFromCookie(String key, Cookie[] cookies) {
         String value = null;
-        if (cookies == null || key == null)
-            log.error("cookies或者key为null!");
-        else {
+        if (cookies != null ) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(key)) {
                     value = cookie.getValue();

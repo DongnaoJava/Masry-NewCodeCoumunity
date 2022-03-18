@@ -40,13 +40,14 @@ public class CommentController implements CommunityConstant {
         comment.setCreateTime(new Date());
         comment.setEntityType(ENTITY_TYPE_POST);
         comment.setEntityId(id);
-        commentService.insertComment(comment);
+        commentService.insertComment(comment,id);
         return CommunityUtil.getJSONString("0", "评论成功！");
     }
 
     //增加一条对评论的回复
+    @ResponseBody
     @PostMapping("/addReply")
-    public String addReply(int replyToEntityId1, String content, int postId, Integer replyToTargetId) {
+    public String addReply(int replyToEntityId, String content, int postId, Integer replyToTargetId) {
         User user = hostHolder.getUser();
         if (user == null)
             throw new IllegalArgumentException("没有权限！");
@@ -61,8 +62,8 @@ public class CommentController implements CommunityConstant {
         comment.setContent(content);
         comment.setCreateTime(new Date());
         comment.setEntityType(ENTITY_TYPE_COMMENT);
-        comment.setEntityId(replyToEntityId1);
-        commentService.insertComment(comment);
+        comment.setEntityId(replyToEntityId);
+        commentService.insertComment(comment,postId);
         return "redirect:/discuss/detail/" + postId;
     }
 }

@@ -42,12 +42,15 @@ public class LogAdvice {
         //获取参数
         Object[] args = joinPoint.getArgs();
         String arg;
-        if (args.length == 0)
+        if (args == null || args.length == 0)
             arg = "";
         else {
             StringBuilder stringBuilder = new StringBuilder();
             for (Object o : args) {
-                stringBuilder.append(o.getClass().getSimpleName()).append(" ").append(o).append(",");
+                if (o == null)
+                    stringBuilder.append("Null null,");
+                else
+                    stringBuilder.append(o.getClass().getSimpleName()).append(" ").append(o).append(",");
             }
             arg = stringBuilder.substring(0, stringBuilder.length() - 1);
         }

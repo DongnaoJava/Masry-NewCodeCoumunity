@@ -63,12 +63,12 @@
             </if>
         </where>
     </select>
-    <update id="updateMessageStatus" >
+    <update id="updateMessageStatus" keyProperty="id">
         update message
         set status=#{status}
         where conversation_id = #{conversationId}
     </update>
-    <update id="updateOneMessageStatus" >
+    <update id="updateOneMessageStatus"  keyProperty="id">
         update message
         set status=#{status}
         where id = #{id}

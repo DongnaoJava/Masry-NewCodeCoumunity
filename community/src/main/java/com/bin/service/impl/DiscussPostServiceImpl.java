@@ -43,7 +43,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     public int selectDiscussPostRowsByUserId(Integer userId) {
         return discussPostMapper.selectDiscussPostRows(userId);
     }
-
+    //根据id查询帖子
     @Override
     public DiscussPost selectDiscussPostById(Integer id) {
         return discussPostMapper.selectDiscussPostById(id);

@@ -32,14 +32,14 @@ public class LetterController implements CommunityConstant {
     @Autowired
     private SensitiveFilter sensitiveFilter;
 
-    @GetMapping("/letter")
-    public String getLetter(Page page, Model model) {
+    @GetMapping("/letter/{loginUserId}")
+    public String getLetter(@PathVariable("loginUserId")Integer loginUserId, Page page, Model model) {
         User user = hostHolder.getUser();
         if(user==null)
             return "redirect:index";
         Integer userId = user.getId();
         Integer rows = messageService.selectConversationsRows(userId);
-        page.setPath("/letter");
+        page.setPath("/letter/"+loginUserId);
         page.setRows(rows);
         List<Message> conversationList = messageService.selectConversations(userId, page.getOffset(), page.getLimit());
         List<Map<String, Object>> mapList = new ArrayList<>();
@@ -66,7 +66,7 @@ public class LetterController implements CommunityConstant {
         model.addAttribute("currentPage",page.getCurrent());
         return "site/letter";
     }
-    @GetMapping("/letter-detail/{fromUserId}")
+    @GetMapping("/letter/detail/{fromUserId}")
     public String getLetterDetail(@PathVariable("fromUserId") Integer fromUserId, Page page, Model model,Integer currentPage) {
         if (fromUserId == null)
             throw new IllegalArgumentException("参数错误！");
@@ -78,7 +78,7 @@ public class LetterController implements CommunityConstant {
         String conversationId = getConversationId(fromUserId,userId);
         Integer messageCount = messageService.selectMessagesRows(conversationId);
         page.setRows(messageCount);
-        page.setPath("/letter-detail/"+fromUserId);
+        page.setPath("/letter/detail/"+fromUserId);
 
         List<Message> messageList = messageService.selectMessages(conversationId, page.getOffset(), page.getLimit());
         List<Map<String, Object>> messageMapList = new ArrayList<>();
@@ -98,6 +98,7 @@ public class LetterController implements CommunityConstant {
         model.addAttribute("fromUser", fromUser);
         model.addAttribute("messageMapList", messageMapList);
         model.addAttribute("currentPage", currentPage);
+        model.addAttribute("loginUserId", toUser.getId());
         return "site/letter-detail";
     }
 

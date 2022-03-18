@@ -1,6 +1,8 @@
 package com.bin.service.impl;
 
 import com.bin.bean.CommunityConstant;
+import com.bin.bean.Event;
+import com.bin.event.EventProducer;
 import com.bin.service.LikeService;
 import com.bin.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,10 +22,12 @@ public class LikeServiceImpl implements LikeService, CommunityConstant {
     private CommentServiceImpl commentService;
     @Autowired
     private DiscussPostServiceImpl discussPostService;
+    @Autowired
+    private EventProducer eventProducer;
 
     //点赞
     @Override
-    public void like(Integer userId, Integer entityType, Integer entityId) {
+    public void like(Integer userId, Integer entityType, Integer entityId,Integer discussPostId) {
         //entityType 1是帖子，2是评论
         String redisLikeKey = RedisKeyUtil.getRedisLikeKey(entityType, entityId);
         BoundSetOperations<String, Object> operations = redisTemplate.boundSetOps(redisLikeKey);
@@ -37,6 +42,18 @@ public class LikeServiceImpl implements LikeService, CommunityConstant {
             //还没有点赞
             operations.add(userId);
             incrUserGetLikeCount(visitorId, userId, entityType, entityId);
+
+            //系统发送通知给用户
+            //userId为点赞发起者
+            Event event  = new Event()
+                    .setUserId(visitorId)
+                    .setCreateTime(new Date())
+                    .setEntityId(entityId)
+                    .setEntityType(entityType)
+                    .setEntityUserId(userId)
+                    .setTopic(TOPIC_LIKE)
+                    .setData("postId", discussPostId);
+            eventProducer.sendEvent(event);
         }
     }
 

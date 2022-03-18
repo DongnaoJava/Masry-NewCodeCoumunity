@@ -18,11 +18,11 @@ public class LikeController {
 
     @ResponseBody
     @PostMapping("/like")
-    public String like(Integer entityId, Integer entityType) {
+    public String like(Integer entityId, Integer entityType,Integer discussPostId) {
         User user = hostHolder.getUser();
         if (user == null)
             return CommunityUtil.getJSONString("401", "您还没有登录！");
-        likeService.like(user.getId(), entityType, entityId);
+        likeService.like(user.getId(), entityType, entityId,discussPostId);
         Integer isLike = likeService.isLike(user.getId(), entityType, entityId);
         if (isLike == 1)
             return CommunityUtil.getJSONString("1", "点赞成功！");

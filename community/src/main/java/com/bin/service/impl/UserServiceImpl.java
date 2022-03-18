@@ -43,7 +43,12 @@ public class UserServiceImpl implements UserMapper, CommunityConstant {
     //根据id查询用户所有信息
     @Override
     public User selectUserById(Integer id) {
-        return userMapper.selectUserById(id);
+
+        //return userMapper.selectUserById(id);
+        User user = getUserByIdFromRedis(id);
+        if (user == null)
+            user = getUserByIdFromMySqlAndInitRedis(id);
+        return user;
     }
 
     //根据用户名查询用户所有信息
@@ -67,19 +72,29 @@ public class UserServiceImpl implements UserMapper, CommunityConstant {
     //根据用户id更新用户状态
     @Override
     public int updateStatus(Integer id, Integer status) {
-        return userMapper.updateStatus(id, status);
+        //redis和mysql的事务是分开的，所以先更新mysql，当mysql的数据更新成功，再删除缓存；
+        int updateRows = userMapper.updateStatus(id, status);
+        if (updateRows > 0)
+            deleteUserFromRedis(id);
+        return updateRows;
     }
 
     //根据用户id更新用户的url
     @Override
     public int updateHeaderUrl(Integer id, String headerUrl) {
-        return userMapper.updateHeaderUrl(id, headerUrl);
+        int updateRows = userMapper.updateHeaderUrl(id, headerUrl);
+        if (updateRows > 0)
+            deleteUserFromRedis(id);
+        return updateRows;
     }
 
     //根据id更新用户的密码
     @Override
     public int updatePassword(Integer id, String password) {
-        return userMapper.updatePassword(id, password);
+        int updateRows = userMapper.updatePassword(id, password);
+        if (updateRows > 0)
+            deleteUserFromRedis(id);
+        return updateRows;
     }
 
     //判断用户注册信息是否符合要求
@@ -200,14 +215,14 @@ public class UserServiceImpl implements UserMapper, CommunityConstant {
 
         //loginTicket保存在redis中
         String ticketKey = RedisKeyUtil.getTicketKey(loginTicket.getTicket());
-        redisTemplate.opsForValue().set(ticketKey,loginTicket);
-        redisTemplate.expire(ticketKey,60, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(ticketKey, loginTicket);
+        redisTemplate.expire(ticketKey, 60, TimeUnit.MINUTES);
         mapInfo.put("ticket", loginTicket.getTicket());
         return mapInfo;
     }
 
     //用户第一次登录
-    public String firstLogin(String username, String password, Model model,String verificationCodeOwner,
+    public String firstLogin(String username, String password, Model model, String verificationCodeOwner,
                              String verificationCode, HttpServletResponse response, boolean remember) {
         String target;
         int expiredTime = remember ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
@@ -247,20 +262,43 @@ public class UserServiceImpl implements UserMapper, CommunityConstant {
     public void logout(String ticket) {
         //ticketService.updateStatusByTicket(ticket, 1);
         //将loginTicket的状态改为1
-        updateLoginTicketStatus(ticket,1);
+        updateLoginTicketStatus(ticket, 1);
     }
 
-    public LoginTicket selectByTicket(String ticket){
+    //根据ticket查询loginTicket
+    public LoginTicket selectByTicket(String ticket) {
         String ticketKey = RedisKeyUtil.getTicketKey(ticket);
         return (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
     }
-    public void updateLoginTicketStatus(String ticket,Integer status){
+
+    //更新longinTicket的状态
+    public void updateLoginTicketStatus(String ticket, Integer status) {
         String ticketKey = RedisKeyUtil.getTicketKey(ticket);
         LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
-        if(loginTicket==null)
+        if (loginTicket == null)
             throw new IllegalArgumentException("redis数据库发生错误！");
         loginTicket.setStatus(status);
-        redisTemplate.opsForValue().set(ticketKey,loginTicket);
+        redisTemplate.opsForValue().set(ticketKey, loginTicket);
+    }
+
+    //优先从缓存中取用户信息
+    private User getUserByIdFromRedis(Integer userId) {
+        String userKey = RedisKeyUtil.getUserKey(userId);
+        return (User) redisTemplate.opsForValue().get(userKey);
+    }
+
+    //娶不到初始化缓存
+    private User getUserByIdFromMySqlAndInitRedis(Integer userId) {
+        User user = userMapper.selectUserById(userId);
+        String userKey = RedisKeyUtil.getUserKey(userId);
+        redisTemplate.opsForValue().set(userKey, user, 3600, TimeUnit.SECONDS);
+        return user;
+    }
+
+    //数据变化时删除缓存
+    private void deleteUserFromRedis(Integer userId) {
+        String userKey = RedisKeyUtil.getUserKey(userId);
+        redisTemplate.delete(userKey);
     }
 }
 

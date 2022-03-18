@@ -66,10 +66,10 @@
 					<!-- 选项 -->
 					<ul class="nav nav-tabs mb-3">
 						<li class="nav-item">
-							<a class="nav-link position-relative active" th:href="@{/letter}">朋友私信<span class="badge badge-danger" th:if="${unreadAllMessageCount!=0}" th:text="${unreadAllMessageCount}">3</span></a>
+							<a class="nav-link position-relative active" th:href="@{|/letter/${loginUserId}|}">朋友私信<span class="badge badge-danger" th:if="${unreadAllLetterCount!=0}" th:text="${unreadAllLetterCount}">3</span></a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link position-relative" href="notice.html">系统通知<span class="badge badge-danger">27</span></a>
+							<a class="nav-link position-relative" th:href="@{|/notice/${loginUserId}|}">系统通知<span class="badge badge-danger" th:if="${unreadAllNoticeCount!=0}" th:text="${unreadAllNoticeCount}">27</span></a>
 						</li>
 					</ul>
 					<button type="button"  class="btn btn-primary btn-sm position-absolute rt-0" data-toggle="modal" data-target="#sendModal">发私信
@@ -131,7 +131,7 @@
 								<span class="float-right text-muted font-size-12" th:text="${ #dates.format(messageMap.message.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-28 14:13:25</span>
 							</h6>
 							<div>
-								<a th:href="@{|/letter-detail/${messageMap.fromUser.id}?currentPage=${currentPage}|}" th:utext="${messageMap.messageSendUser.id==messageMap.fromUser.id?messageMap.messageSendUser.username:'我'}+' :  '+${messageMap.message.content}">米粉车, 你来吧!</a>
+								<a th:href="@{|/letter/detail/${messageMap.fromUser.id}?currentPage=${currentPage}|}" th:utext="${messageMap.messageSendUser.id==messageMap.fromUser.id?messageMap.messageSendUser.username:'我'}+' :  '+${messageMap.message.content}">米粉车, 你来吧!</a>
 								<ul class="d-inline font-size-12 float-right">
 									<li class="d-inline ml-2"><a href="#" class="text-primary">共<i th:text="${messageMap.messageCount}"></i>条会话</a></li>
 								</ul>
