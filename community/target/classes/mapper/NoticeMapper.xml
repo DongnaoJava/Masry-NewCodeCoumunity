@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bin.dao.NoticeMapper">
+    <sql id="selectFields">
+        id
+        ,from_id,to_id,conversation_id,content,status,create_time
+    </sql>
+    <select id="selectOneNewestOneTypeNotice" resultType="com.bin.bean.Message">
+        select
+        <include refid="selectFields"></include>
+        from message
+        where status != 2
+        and from_id = 1
+        and conversation_id = #{noticeType}
+        and to_id = #{userId}
+        order by create_time desc
+        limit 0,1
+    </select>
+    <select id="selectAllOneTypeNotices" resultType="com.bin.bean.Message">
+        select
+        <include refid="selectFields"></include>
+        from message
+        where status != 2
+        and from_id = 1
+        and conversation_id = #{noticeType}
+        and to_id = #{userId}
+        order by create_time desc
+        limit #{offset}, #{limit}
+    </select>
+    <select id="selectAllOneTypeNoticesCount" resultType="int">
+        select count(id)
+        from message
+        where status != 2
+        and from_id = 1
+        and conversation_id = #{noticeType}
+          and to_id = #{userId}
+    </select>
+    <select id="selectAllUnreadOneTypeNoticesCount" resultType="int">
+        select count(id)
+        from message
+        where status = 0
+          and from_id = 1
+          and conversation_id = #{noticeType}
+          and to_id = #{userId}
+    </select>
+    <select id="selectUnreadNoticesRows" resultType="int">
+        select count(id)
+        from message
+        where status = 0
+          and from_id = 1
+          and to_id = #{userId}
+    </select>
+    <update id="updateOneNoticeStatus" keyProperty="id">
+        update message
+        set status=#{status}
+        where id = #{id}
+    </update>
+    <update id="updateOneTypeNoticeStatus" keyProperty="id">
+        update message
+        set status=#{status}
+        where status = 0
+          and conversation_id = #{conversationId}
+    </update>
+</mapper>
